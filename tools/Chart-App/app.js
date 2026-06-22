@@ -235,7 +235,11 @@ function downloadCurrentChart() {
     tempCtx.drawImage(canvas, 0, 0);
 
     const link = document.createElement("a");
-    link.download = `chart_${currentIndex + 1}.png`;
+    
+    // Create filename with operator title and timestamp
+    const title = chartDataList[currentIndex].title.replace(/[^a-z0-9]/gi, "_");
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+    link.download = `${title}_${timestamp}.png`;
     link.href = tempCanvas.toDataURL("image/png");
 
     link.click();
@@ -257,9 +261,11 @@ async function downloadAllCharts() {
 
         const link = document.createElement("a");
 
-        let name = chartDataList[i].title.replace(/[^a-z0-9]/gi, "_");
-
-        link.download = `${name}.png`;
+        // Create filename with operator title and timestamp
+        const name = chartDataList[i].title.replace(/[^a-z0-9]/gi, "_");
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+        link.download = `${name}_${timestamp}.png`;
+        
         const canvas = currentChart.canvas;
 
         const tempCanvas = document.createElement("canvas");
@@ -480,3 +486,11 @@ function showMasterChart() {
         ]
     });
 }
+
+// ===== Auto-run on file select =====
+document.addEventListener("DOMContentLoaded", () => {
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+        fileInput.addEventListener("change", process);
+    }
+});

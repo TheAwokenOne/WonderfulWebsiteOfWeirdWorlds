@@ -63,6 +63,14 @@
             text-align: center;
             flex-grow: 1;
         }
+
+        .file-button {
+            padding: 8px 14px;
+            background: #0078d4;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
     </style>
 
 </head>
@@ -72,8 +80,10 @@
         loadNav();
     </script>
 <div id="top-bar">
-    <input type="file" id="fileInput" multiple>
-    <button onclick="process()">Run</button>
+    <label for="fileInput" class="file-button">
+        Select Excel Files
+    </label>
+    <input type="file" id="fileInput" multiple hidden>
 </div>
 
 <div id="viewer">
