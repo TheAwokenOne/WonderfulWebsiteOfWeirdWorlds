@@ -103,6 +103,16 @@ function renderCurrentChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 30
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
             scales: {
                 x: { stacked: true },
                 y: {
@@ -114,37 +124,58 @@ function renderCurrentChart() {
         },
 
         // ✅ ✅ THIS IS THE KEY PART
-        plugins: [{
-            id: 'taktLine',
-            afterDraw: (chart) => {
-                const yScale = chart.scales.y;
-                const ctx = chart.ctx;
+        plugins: [
+            {
+                id: 'chartTitle',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    ctx.save();
 
-                const y = yScale.getPixelForValue(takt);
+                    // Draw title at top of canvas with padding
+                    ctx.fillStyle = "black";
+                    ctx.font = "bold 14px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText(
+                        chartInfo.title,
+                        chart.width / 2,
+                        20
+                    );
 
-                ctx.save();
+                    ctx.restore();
+                }
+            },
+            {
+                id: 'taktLine',
+                afterDraw: (chart) => {
+                    const yScale = chart.scales.y;
+                    const ctx = chart.ctx;
 
-                // Draw blue line
-                ctx.beginPath();
-                ctx.moveTo(chart.chartArea.left, y);
-                ctx.lineTo(chart.chartArea.right, y);
-                ctx.strokeStyle = "blue";
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                    const y = yScale.getPixelForValue(takt);
 
-                // Draw label
-                ctx.fillStyle = "blue";
-                ctx.font = "12px Arial";
+                    ctx.save();
 
-                ctx.fillText(
-                    `TAKT (${takt})`,
-                    chart.chartArea.left + 5,
-                    y - 5
-                );
+                    // Draw blue line
+                    ctx.beginPath();
+                    ctx.moveTo(chart.chartArea.left, y);
+                    ctx.lineTo(chart.chartArea.right, y);
+                    ctx.strokeStyle = "blue";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
 
-                ctx.restore();
+                    // Draw label
+                    ctx.fillStyle = "blue";
+                    ctx.font = "12px Arial";
+
+                    ctx.fillText(
+                        `TAKT (${takt})`,
+                        chart.chartArea.left + 5,
+                        y - 5
+                    );
+
+                    ctx.restore();
+                }
             }
-        }]
+        ]
     });
 }
 
@@ -356,6 +387,16 @@ function showMasterChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 30
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
             scales: {
                 x: {
                     stacked: true,
@@ -374,51 +415,68 @@ function showMasterChart() {
 
         // ✅ SAME TAKT LINE
         plugins: [
-            
-            
             {
-            id: 'whiteBackground',
-            beforeDraw: (chart) => {
-                const ctx = chart.ctx;
-                ctx.save();
-                ctx.globalCompositeOperation = 'destination-over';
-                ctx.fillStyle = 'white';  // ✅ force white background
-                ctx.fillRect(0, 0, chart.width, chart.height);
-                ctx.restore();
-            }
+                id: 'chartTitle',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    ctx.save();
+
+                    // Draw title at top of canvas with padding
+                    ctx.fillStyle = "black";
+                    ctx.font = "bold 14px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText(
+                        `Master WACT Comparison (${labels.length} Charts)`,
+                        chart.width / 2,
+                        20
+                    );
+
+                    ctx.restore();
+                }
             },
-            
             {
-            id: 'taktLine',
-            afterDraw: (chart) => {
-                const yScale = chart.scales.y;
-                const ctx = chart.ctx;
+                id: 'whiteBackground',
+                beforeDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = 'white';  // ✅ force white background
+                    ctx.fillRect(0, 0, chart.width, chart.height);
+                    ctx.restore();
+                }
+            },
+            {
+                id: 'taktLine',
+                afterDraw: (chart) => {
+                    const yScale = chart.scales.y;
+                    const ctx = chart.ctx;
 
-                const y = yScale.getPixelForValue(takt);
+                    const y = yScale.getPixelForValue(takt);
 
-                ctx.save();
+                    ctx.save();
 
-                // line
-                ctx.beginPath();
-                ctx.moveTo(chart.chartArea.left, y);
-                ctx.lineTo(chart.chartArea.right, y);
-                ctx.strokeStyle = "blue";
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                    // line
+                    ctx.beginPath();
+                    ctx.moveTo(chart.chartArea.left, y);
+                    ctx.lineTo(chart.chartArea.right, y);
+                    ctx.strokeStyle = "blue";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
 
-                // label inside chart
-                ctx.fillStyle = "white";
-                ctx.fillRect(chart.chartArea.left + 2, y - 12, 90, 16);
+                    // label inside chart
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(chart.chartArea.left + 2, y - 12, 90, 16);
 
-                ctx.fillStyle = "blue";
-                ctx.fillText(
-                    `TAKT (${takt})`,
-                    chart.chartArea.left + 5,
-                    y
-                );
+                    ctx.fillStyle = "blue";
+                    ctx.fillText(
+                        `TAKT (${takt})`,
+                        chart.chartArea.left + 5,
+                        y
+                    );
 
-                ctx.restore();
+                    ctx.restore();
+                }
             }
-        }]
+        ]
     });
 }
