@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/WonderfulWebsiteOfWeirdWorlds/common/styles.css">
+    <script src="/WonderfulWebsiteOfWeirdWorlds/common/nav.js"></script>
+
+    <title>Chart Generator</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Excel parser -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+        }
+
+        #top-bar {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #viewer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        #chart-container {
+            width: 1200px;
+            height: 650px;
+            background: white;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #controls {
+            margin-top: 15px;
+            width: 1200px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+
+        #controls button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        #chartTitle {
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+        }
+    </style>
+
+</head>
+
+<body>
+    <script>
+        loadNav();
+    </script>
+<div id="top-bar">
+    <input type="file" id="fileInput" multiple>
+    <button onclick="process()">Run</button>
+</div>
+
+<div id="viewer">
+
+    <div id="chart-container">
+        <canvas id="mainChart"></canvas>
+    </div>
+
+    <div id="controls">
+        <button onclick="prevChart()">◀ Previous</button>
+
+        <button onclick="downloadCurrentChart()">Download Chart</button>
+        <button onclick="downloadAllCharts()">Download All</button>
+
+        <button onclick="showMasterChart()">Master Chart</button>
+        <button onclick="backToCharts()">Back to Charts</button>
+
+        <div id="chartTitle">No chart loaded</div>
+
+        <button onclick="nextChart()">Next ▶</button>
+    </div>
+
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
