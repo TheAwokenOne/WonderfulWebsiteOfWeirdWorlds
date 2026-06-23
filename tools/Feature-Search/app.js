@@ -28,10 +28,10 @@ async function loadData() {
         // Render feature list for side panel
         renderFeatureList();
 
-        status.innerText = "✅ Database Loaded";
+        status.innerText = "Database Loaded";
     } catch (err) {
         console.error(err);
-        status.innerText = "❌ Failed to decrypt";
+        status.innerText = "Failed to decrypt";
     }
 }
 
@@ -43,7 +43,7 @@ function runSearch() {
     const resultsDiv = document.getElementById("results");
 
     if (!DATABASE) {
-        resultsDiv.innerText = "⚠️ Load database first";
+        resultsDiv.innerText = "Load database before searching";
         return;
     }
 
@@ -150,7 +150,7 @@ function renderFeatureList() {
 
     list.innerHTML = entries.map(([code, desc]) => `
         <div class="feature-item" onclick="addFeatureToInput('${code}')">
-            <b>${code}</b> - <span style="color:gray">${desc}</span>
+            <b class="feature-code">${code} -</b> <span style="color:black">${desc}</span>
         </div>
     `).join('');
 }
@@ -166,7 +166,7 @@ function filterFeatureList() {
 
     list.innerHTML = entries.map(([code, desc]) => `
         <div class="feature-item" onclick="addFeatureToInput('${code}')">
-            <b>${code}</b> - <span style="color:gray">${desc}</span>
+            <b class="feature-code">${code} -</b> <span style="color:black">${desc}</span>
         </div>
     `).join('');
 }
@@ -261,7 +261,7 @@ function runComboSearch() {
     const singlesOnly = document.getElementById("singlesOnly").checked;
 
     if (!DATABASE) {
-        resultsDiv.innerText = "⚠️ Load database first";
+        resultsDiv.innerText = "Load database before searching";
         return;
     }
 
@@ -289,32 +289,25 @@ function runComboSearch() {
     for (const item of analysis.top) {
         const comboStr = item.combo.join("+");
 
-        // ✅ Main summary line
         output += `
-            <div style="
-                margin-bottom:12px;
-                padding:8px;
-                border:1px solid #ddd;
-                border-radius:6px;
-                background:#fafafa;
-            ">
+            <div class="result-card">
                 <b>${comboStr}</b> - 
-                <span style="color:blue">${item.percent.toFixed(2)}%</span> 
+                <span style="color:#0078d4">${item.percent.toFixed(2)}%</span> 
                 (${item.count} units)
                 <br>
         `;
 
         for (const code of item.combo) {
             output += `
-                <span style="color:#555; font-size:0.9em;">
+                <div class="subtext">
                     ${FEATURE_INFO[code] || "N/A"}
-                </span><br>
+                </div>
             `;
         }
 
         output += `</div>`;
-
     }
+
 
     resultsDiv.innerHTML = output;
 }

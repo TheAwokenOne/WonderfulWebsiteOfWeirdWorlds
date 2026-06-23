@@ -27,6 +27,16 @@ function getText(ws, addr) {
     return val ? val.toString().trim() : "-";
 }
 
+function toggleMasterView() {
+    if (isMasterView) {
+        backToCharts();
+    } else {
+        showMasterChart();
+    }
+}
+
+
+
 // ===== extraction =====
 function extractVariationData(ws) {
     const cols = ["H", "J", "L", "N", "P"];
@@ -181,13 +191,11 @@ function renderCurrentChart() {
 
 function backToCharts() {
     isMasterView = false;
+
+    const btn = document.getElementById("masterToggleBtn");
+    btn.innerText = "Show Master Chart";
+    btn.classList.remove("active-mode");
     if (chartDataList.length === 0) return;
-
-    const container = document.getElementById("chart-container");
-
-    // restore size
-    container.style.width = "1200px";
-    container.style.height = "650px";
 
     // ✅ destroy master chart if it exists
     if (currentChart) {
@@ -357,8 +365,12 @@ async function process() {
 function showMasterChart() {
     isMasterView = true;
 
-    if (masterChartData.length === 0) return;
+    const btn = document.getElementById("masterToggleBtn");
+    btn.innerText = "Back to Charts";
+    btn.classList.add("active-mode");
 
+    if (masterChartData.length === 0) return;
+    if (chartDataList.length === 0) return;
     const canvas = document.getElementById("mainChart");
     const ctx = canvas.getContext("2d");
 

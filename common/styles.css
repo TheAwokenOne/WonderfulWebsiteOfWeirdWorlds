@@ -1,15 +1,194 @@
+:root {
+    /* Core Colors */
+    --color-primary: #e11d8a;       /* toned-down neon pink */
+    --color-primary-dark: #9d174d;
+
+    --color-secondary: #06b6d4;     /* softer cyan */
+    --color-tertiary: #facc15;      /* controlled yellow */
+
+    /* Text */
+    --color-text-main: #e5e7eb;
+    --color-text-muted: #94a3b8;
+
+    /* Surfaces (lighter + more professional) */
+    --color-background: #111827;
+    --color-card: #1f2937;
+    --color-border: #374151;
+
+    /* Effects (reduced glow) */
+    --shadow-card: 0 4px 14px rgba(225, 29, 138, 0.18);
+
+    --color-chart-bg: #f8fafc;   /* soft gray (almost white) */
+    --color-chart-border: #e5e7eb;
+}
+.feature-code {
+    color: black;
+    font-weight: 600;
+}
+
+/* ===== BODY ===== */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text-main);
+}
+
+/* ===== NAVBAR ===== */
 #navbar {
-    background: #333;
-    padding: 10px;
+    display: flex;
+    gap: 25px;
+    padding: 14px 24px;
+    background: #1f2937;
+    border-bottom: 1px solid var(--color-border);
 }
 
 #navbar a {
-    color: white;
-    margin-right: 20px;
+    position: relative;
+    color: var(--color-text-muted);
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 500;
+    padding: 6px 2px;
+    transition: all 0.2s ease;
 }
 
+/* Hover (clean, not loud) */
 #navbar a:hover {
-    text-decoration: underline;
+    color: var(--color-secondary);
+}
+
+/* underline animation */
+#navbar a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0%;
+    height: 2px;
+    background: var(--color-primary);
+    transition: width 0.25s ease;
+}
+
+#navbar a:hover::after {
+    width: 100%;
+}
+
+/* active tab */
+#navbar a.active {
+    color: var(--color-primary);
+}
+
+#navbar a.active::after {
+    width: 100%;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: var(--color-card);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border);
+    transition: all 0.2s ease;
+}
+
+/* subtle hover */
+.card:hover {
+    box-shadow: 0 6px 18px rgba(225, 29, 138, 0.22);
+    transform: translateY(-1px);
+}
+
+/* ===== TITLES ===== */
+h2 {
+    margin-top: 0;
+    color: var(--color-secondary);
+    font-weight: 600;
+}
+
+/* ===== INPUTS ===== */
+input[type="text"],
+input[type="password"] {
+    padding: 9px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    width: 300px;
+    background: #111827;
+    color: var(--color-text-main);
+    transition: all 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
+}
+
+/* ===== BUTTONS ===== */
+button {
+    padding: 9px 16px;
+    margin-left: 6px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-primary);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* refined hover */
+button:hover {
+    background: var(--color-primary-dark);
+    box-shadow: 0 0 8px rgba(225, 29, 138, 0.5);
+    transform: translateY(-1px);
+}
+button.active-mode {
+    background: var(--color-secondary);
+    color: #022c33;
+}
+/* secondary button */
+.button-secondary {
+    background: var(--color-secondary);
+    color: #022c33;
+}
+
+.button-secondary:hover {
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+}
+
+/* ===== RESULT CARDS ===== */
+.result-card {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #111827;
+    transition: all 0.2s ease;
+}
+
+.result-card:hover {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 6px rgba(6, 182, 212, 0.35);
+}
+
+/* ===== TEXT ===== */
+.subtext {
+    color: var(--color-text-muted);
+    font-size: 0.9em;
+}
+
+/* ===== HIGHLIGHTS ===== */
+.highlight-primary {
+    color: var(--color-primary);
+}
+
+.highlight-secondary {
+    color: var(--color-secondary);
 }

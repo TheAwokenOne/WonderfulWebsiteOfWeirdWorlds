@@ -4,76 +4,117 @@
     <title>Feature Search</title>
 
     <link rel="stylesheet" href="../../common/styles.css">
+
+    <style>
+        .container {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .left {
+            flex: 1;
+            min-width: 350px;
+        }
+
+        .right {
+            width: 360px;
+        }
+
+        .feature-list {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            max-height: 420px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .feature-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .feature-item:hover {
+            background: #f2f6fb;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+    </style>
 </head>
 
 <body>
 
 <!-- NAV -->
 <script src="../../common/nav.js"></script>
-<script>loadNav();</script>
-
-<h2>Feature Search Tool</h2>
-<style>
-    .container { display:flex; gap:24px; align-items:flex-start; }
-    .left { flex:1; min-width:300px; }
-    .right { width:340px; }
-    .feature-list { border:1px solid #ccc; max-height:420px; overflow:auto; padding:4px; }
-    .feature-item { padding:6px; border-bottom:1px solid #eee; cursor:pointer; }
-    .feature-item:hover { background:#f6f6f6; }
-</style>
+<!-- <script>loadNav();</script> -->
 
 <div class="container">
+
+    <!-- LEFT PANEL -->
     <div class="left">
 
-        <!-- PASSWORD LOAD -->
-        <div>
-            <label>Password:</label>
+        <h2>Feature Search Tool</h2>
+
+        <!-- LOAD DATABASE -->
+        <div class="card section">
+            <label>Password:</label><br><br>
             <input type="password" id="password">
             <button onclick="loadData()">Load Database</button>
+
+            <div id="status" style="margin-top:10px;"></div>
         </div>
 
-        <br>
+        <!-- INPUT + OPTIONS -->
+        <div class="card section">
+            <label><b>Enter Feature Code(s)</b> (comma separated):</label><br><br>
+            <input type="text" id="featureInput" style="width:100%;">
 
-        <!-- INPUT -->
-        <div>
-            <label>Feature Codes (comma separated):</label><br>
-            <input type="text" id="featureInput" style="width:400px;">
-        </div>
+            <br><br>
 
-        <br>
-
-        <!-- OPTIONS -->
-        <div>
             <label>
                 <input type="checkbox" id="singlesOnly">
-                Singles Only (no combinations)
+                Compare individually (no combos)
             </label>
+
+            <br><br>
+
+            <button onclick="runSearch()">Run Analysis</button>
         </div>
-
-        <br>
-
-        <!-- BUTTONS -->
-        <div>
-            <!-- <button onclick="runSearch()">Single Feature Search</button> -->
-            <button onclick="runComboSearch()">Analyze Combinations</button>
-        </div>
-
-        <br>
-
-        <!-- STATUS -->
-        <div id="status"></div>
-
-        <br>
 
         <!-- RESULTS -->
-        <div id="results"></div>
+        <div class="card section">
+            <div id="results">Results will appear here...</div>
+        </div>
 
     </div>
 
+    <!-- RIGHT PANEL -->
     <div class="right">
-        <label>Features List</label><br>
-        <input type="text" id="featureListSearch" placeholder="Search features..." style="width:300px;margin-bottom:8px;" oninput="filterFeatureList()">
-        <div id="featureList" class="feature-list"></div>
+
+        <div class="card">
+            <label><b>Feature List</b></label><br><br>
+
+            <input
+                type="text"
+                id="featureListSearch"
+                placeholder="Search features..."
+                style="width:95%; margin-bottom:10px;"
+                oninput="filterFeatureList()"
+            >
+
+            <div id="featureList" class="feature-list"></div>
+        </div>
+
     </div>
 
 </div>

@@ -7,34 +7,107 @@
     <script src="common/nav.js"></script>
 
     <style>
-        .tool-container {
-            display: flex;
-            justify-content: center;
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            margin-bottom: 5px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 20px;
-            margin-top: 50px;
         }
 
         .tool-card {
-            background: white;
-            padding: 20px;
-            width: 250px;
-            border: 1px solid #ccc;
             cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-primary);
+            box-shadow: 0 6px 18px rgba(225, 29, 138, 0.25);
+        }
+
+        .tool-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--color-secondary);
+            margin-bottom: 6px;
+        }
+
+        .tool-description {
+            color: var(--color-text-muted);
+            font-size: 0.95em;
+        }
+
+        .tool-tag {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: var(--color-primary);
         }
     </style>
 </head>
 
 <body>
 
-<script>loadNav();</script>
+<!-- <script src="common/nav.js"></script> -->
 
-<h1 style="text-align:center;">My Tool Suite</h1>
+<div class="container">
 
-<div class="tool-container">
+    <!-- HERO / HEADER -->
+    <div class="hero">
+        <h1 class="highlight-primary">Andrew's Wonderful Website of Weird Worlds</h1>
+        <div class="subtext">
+            Tools for the TBP community, including WACT chart generation, feature search, and more.
+        </div>
+    </div>
 
-    <div class="tool-card" onclick="location.href='tools/chart-app/index.html'">
-        <h2>Chart Tool</h2>
-        <p>Make Charts for Operators from Position Standards</p>
+    <!-- TOOL GRID -->
+    <div class="tool-grid">
+
+        <!-- Chart Tool -->
+        <div class="card tool-card"
+             onclick="location.href='tools/Chart-App/index.html'">
+            <div class="tool-title">Chart Generator</div>
+            <div class="tool-description">
+                Generate WACT charts from Excel position standards and navigate between multiple datasets.
+            </div>
+
+            <div class="tool-tag">Visualization</div>
+        </div>
+
+
+        <!-- Feature Search Tool -->
+        <div class="card tool-card"
+             onclick="location.href='tools/Feature-Search/index.html'">
+            <div class="tool-title">Feature Search</div>
+            <div class="tool-description">
+                Analyze feature frequency, compare combinations, and explore unit configurations.
+            </div>
+
+            <div class="tool-tag">Analysis</div>
+        </div>
+
+
+        <!-- FUTURE TOOL SLOT -->
+        <div class="card tool-card"
+             onclick="alert('Coming soon')">
+
+            <div class="tool-title">+ Add New Tool</div>
+
+            <div class="tool-description">
+                Placeholder for future modules (data processing, reports, etc.)
+            </div>
+
+            <div class="tool-tag">Expand</div>
+        </div>
+
     </div>
 
 </div>

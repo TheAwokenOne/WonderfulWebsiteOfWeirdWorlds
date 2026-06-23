@@ -11,17 +11,37 @@ function loadNav() {
     const chartPath = toolPath("Chart-App");
     const featurePath = toolPath("Feature-Search");
 
+    const currentPath = window.location.pathname.toLowerCase();
+
+    function getActiveClass(type) {
+        if (type === "home") {
+            return currentPath.includes("/tools/") ? "" : "active";
+        }
+        if (type === "chart") {
+            return currentPath.includes("chart-app") ? "active" : "";
+        }
+        if (type === "feature") {
+            return currentPath.includes("feature-search") ? "active" : "";
+        }
+        return "";
+    }
+
     const nav = document.createElement("div");
 
     nav.innerHTML = `
         <div id="navbar">
-            <a href="${homePath}">Home</a>
-            <a href="${chartPath}">Chart Tool</a>
-            <a href="${featurePath}">Feature Search</a>
+            <a href="${homePath}" class="${getActiveClass('home')}">Home</a>
+            <a href="${chartPath}" class="${getActiveClass('chart')}">Chart Tool</a>
+            <a href="${featurePath}" class="${getActiveClass('feature')}">Feature Search</a>
         </div>
     `;
 
     document.body.insertBefore(nav, document.body.firstChild);
 }
 
-// window.addEventListener("DOMContentLoaded", loadNav);
+// ✅ Safe load
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadNav);
+} else {
+    loadNav();
+}

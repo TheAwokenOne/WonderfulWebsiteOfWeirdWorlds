@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Chart Generator</title>
+
     <link rel="stylesheet" href="../../common/styles.css">
     <script src="../../common/nav.js"></script>
-
-    <title>Chart Generator</title>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,99 +13,118 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-        }
-
-        #top-bar {
-            padding: 15px;
+        .top-bar {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        #viewer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
-        #chart-container {
-            width: 1200px;
+        .chart-container {
+            width: 100%;
             height: 650px;
-            background: white;
-            border: 1px solid #ccc;
             display: flex;
             align-items: center;
             justify-content: center;
+
+            background: var(--color-chart-bg);
+            border: 1px solid var(--color-chart-border);
+            border-radius: 8px;
+        }
+        .chart-container canvas {
+            padding: 10px;
         }
 
-        #controls {
-            margin-top: 15px;
-            width: 1200px;
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .controls {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
             gap: 10px;
+            margin-top: 12px;
         }
 
-
-        #controls button {
-            padding: 8px 14px;
-            cursor: pointer;
+        .button-group {
+            display: flex;
+            gap: 8px;
         }
 
         #chartTitle {
-            font-weight: bold;
+            font-weight: 600;
             text-align: center;
-            flex-grow: 1;
+            flex: 1;
+            color: var(--color-secondary);
         }
 
         .file-button {
-            padding: 8px 14px;
-            background: #0078d4;
+            display: inline-block;
+            padding: 10px 16px;
+            background: var(--color-primary);
             color: white;
+            border-radius: 6px;
             cursor: pointer;
-            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .file-button:hover {
+            background: var(--color-primary-dark);
+            box-shadow: 0 0 8px rgba(225, 29, 138, 0.5);
         }
     </style>
-
 </head>
 
 <body>
-    <script>
-        loadNav();
-    </script>
-<div id="top-bar">
-    <label for="fileInput" class="file-button">
-        Select Excel Files
-    </label>
-    <input type="file" id="fileInput" multiple hidden>
-</div>
 
-<div id="viewer">
+<!-- <script>
+    loadNav();
+</script> -->
 
-    <div id="chart-container">
-        <canvas id="mainChart"></canvas>
+<div class="container">
+
+    <h2 class="highlight-secondary">Chart Generator</h2>
+
+    <!-- FILE SELECT -->
+    <div class="card top-bar">
+        <label for="fileInput" class="file-button">
+            Select Excel Files
+        </label>
+        <input type="file" id="fileInput" multiple hidden>
     </div>
 
-    <div id="controls">
-        <button onclick="prevChart()">◀ Previous</button>
+    <!-- CHART -->
+    <div class="card">
 
-        <button onclick="downloadCurrentChart()">Download Chart</button>
-        <button onclick="downloadAllCharts()">Download All</button>
+        <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+        </div>
 
-        <button onclick="showMasterChart()">Master Chart</button>
-        <button onclick="backToCharts()">Back to Charts</button>
+        <!-- CONTROLS -->
+        <div class="controls">
 
-        <div id="chartTitle">No chart loaded</div>
+            <!-- LEFT -->
+            <div class="button-group">
+                <button onclick="prevChart()">◀ Previous</button>
+                <button onclick="nextChart()">Next ▶</button>
+            </div>
 
-        <button onclick="nextChart()">Next ▶</button>
+            <!-- TITLE -->
+            <div id="chartTitle">No chart loaded</div>
+
+            <!-- RIGHT -->
+            <div class="button-group">
+                <button onclick="downloadCurrentChart()">Download</button>
+                <button onclick="downloadAllCharts()">Download All</button>
+                <button id="masterToggleBtn" onclick="toggleMasterView()">Show Master Chart</button>
+                <button onclick="backToCharts()">Back</button>
+            </div>
+
+        </div>
+
     </div>
-
 
 </div>
 
@@ -113,3 +132,4 @@
 
 </body>
 </html>
+``
