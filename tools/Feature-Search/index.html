@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Feature Search Tool</title>
-    <link rel="stylesheet" href="/common/styles.css">
-    <script src="/common/nav.js" defer></script>
+    <title>Feature Search</title>
+
+    <link rel="stylesheet" href="../../common/styles.css">
 </head>
 
 <body>
+
+<!-- NAV -->
+<script src="../../common/nav.js"></script>
 <script>loadNav();</script>
-<div id="nav-container"></div>
 
 <h2>Feature Search Tool</h2>
 
+<!-- PASSWORD LOAD -->
 <div>
     <label>Password:</label>
     <input type="password" id="password">
@@ -21,17 +23,43 @@
 
 <br>
 
+<!-- INPUT -->
 <div>
-    <label>Feature Code:</label>
-    <input type="text" id="featureInput">
-    <button onclick="runSearch()">Search</button>
+    <label>Feature Codes (comma separated):</label><br>
+    <input type="text" id="featureInput" onkeyup="showSuggestions()" style="width:400px;">
+    <div id="suggestions" style="border:1px solid #ccc; max-width:400px;"></div>
+    
 </div>
 
 <br>
 
+<!-- OPTIONS -->
+<div>
+    <label>
+        <input type="checkbox" id="singlesOnly">
+        Singles Only (no combinations)
+    </label>
+</div>
+
+<br>
+
+<!-- BUTTONS -->
+<div>
+    <button onclick="runSearch()">Single Feature Search</button>
+    <button onclick="runComboSearch()">Analyze Combinations</button>
+</div>
+
+<br>
+
+<!-- STATUS -->
 <div id="status"></div>
+
+<br>
+
+<!-- RESULTS -->
 <div id="results"></div>
 
+<!-- SCRIPTS -->
 <script src="decrypt.js"></script>
 <script src="app.js"></script>
 

@@ -24,4 +24,4 @@ function loadNav() {
     document.body.insertBefore(nav, document.body.firstChild);
 }
 
-window.addEventListener("DOMContentLoaded", loadNav);
+// window.addEventListener("DOMContentLoaded", loadNav);
