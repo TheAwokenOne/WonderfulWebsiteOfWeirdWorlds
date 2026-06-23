@@ -2,6 +2,8 @@ let DATABASE = null;
 let FEATURE_INFO = null;
 let JOB_FEATURE_MAP = null;
 
+
+
 // ----------------------
 // LOAD + DECRYPT
 // ----------------------
