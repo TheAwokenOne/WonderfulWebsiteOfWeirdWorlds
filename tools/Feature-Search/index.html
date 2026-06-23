@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feature Search Tool</title>
+    <link rel="stylesheet" href="/common/styles.css">
+    <script src="/common/nav.js" defer></script>
+</head>
+
+<body>
+
+<div id="nav-container"></div>
+
+<h2>Feature Search Tool</h2>
+
+<div>
+    <label>Password:</label>
+    <input type="password" id="password">
+    <button onclick="loadData()">Load Database</button>
+</div>
+
+<br>
+
+<div>
+    <label>Feature Code:</label>
+    <input type="text" id="featureInput">
+    <button onclick="runSearch()">Search</button>
+</div>
+
+<br>
+
+<div id="status"></div>
+<div id="results"></div>
+
+<script src="decrypt.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
