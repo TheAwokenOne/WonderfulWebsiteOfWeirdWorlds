@@ -13,51 +13,70 @@
 <script>loadNav();</script>
 
 <h2>Feature Search Tool</h2>
+<style>
+    .container { display:flex; gap:24px; align-items:flex-start; }
+    .left { flex:1; min-width:300px; }
+    .right { width:340px; }
+    .feature-list { border:1px solid #ccc; max-height:420px; overflow:auto; padding:4px; }
+    .feature-item { padding:6px; border-bottom:1px solid #eee; cursor:pointer; }
+    .feature-item:hover { background:#f6f6f6; }
+</style>
 
-<!-- PASSWORD LOAD -->
-<div>
-    <label>Password:</label>
-    <input type="password" id="password">
-    <button onclick="loadData()">Load Database</button>
+<div class="container">
+    <div class="left">
+
+        <!-- PASSWORD LOAD -->
+        <div>
+            <label>Password:</label>
+            <input type="password" id="password">
+            <button onclick="loadData()">Load Database</button>
+        </div>
+
+        <br>
+
+        <!-- INPUT -->
+        <div>
+            <label>Feature Codes (comma separated):</label><br>
+            <input type="text" id="featureInput" style="width:400px;">
+        </div>
+
+        <br>
+
+        <!-- OPTIONS -->
+        <div>
+            <label>
+                <input type="checkbox" id="singlesOnly">
+                Singles Only (no combinations)
+            </label>
+        </div>
+
+        <br>
+
+        <!-- BUTTONS -->
+        <div>
+            <!-- <button onclick="runSearch()">Single Feature Search</button> -->
+            <button onclick="runComboSearch()">Analyze Combinations</button>
+        </div>
+
+        <br>
+
+        <!-- STATUS -->
+        <div id="status"></div>
+
+        <br>
+
+        <!-- RESULTS -->
+        <div id="results"></div>
+
+    </div>
+
+    <div class="right">
+        <label>Features List</label><br>
+        <input type="text" id="featureListSearch" placeholder="Search features..." style="width:300px;margin-bottom:8px;" oninput="filterFeatureList()">
+        <div id="featureList" class="feature-list"></div>
+    </div>
+
 </div>
-
-<br>
-
-<!-- INPUT -->
-<div>
-    <label>Feature Codes (comma separated):</label><br>
-    <input type="text" id="featureInput" onkeyup="showSuggestions()" style="width:400px;">
-    <div id="suggestions" style="border:1px solid #ccc; max-width:400px;"></div>
-    
-</div>
-
-<br>
-
-<!-- OPTIONS -->
-<div>
-    <label>
-        <input type="checkbox" id="singlesOnly">
-        Singles Only (no combinations)
-    </label>
-</div>
-
-<br>
-
-<!-- BUTTONS -->
-<div>
-    <button onclick="runSearch()">Single Feature Search</button>
-    <button onclick="runComboSearch()">Analyze Combinations</button>
-</div>
-
-<br>
-
-<!-- STATUS -->
-<div id="status"></div>
-
-<br>
-
-<!-- RESULTS -->
-<div id="results"></div>
 
 <!-- SCRIPTS -->
 <script src="decrypt.js"></script>

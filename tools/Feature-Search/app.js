@@ -25,6 +25,9 @@ async function loadData() {
         // Pre-build map (performance)
         JOB_FEATURE_MAP = buildJobFeatureMap(DATABASE);
 
+        // Render feature list for side panel
+        renderFeatureList();
+
         status.innerText = "✅ Database Loaded";
     } catch (err) {
         console.error(err);
@@ -36,13 +39,27 @@ async function loadData() {
 // BASIC SINGLE SEARCH
 // ----------------------
 function runSearch() {
-    const input = document.getElementById("featureInput").value.trim();
+    const rawInput = document.getElementById("featureInput").value.trim();
     const resultsDiv = document.getElementById("results");
 
     if (!DATABASE) {
         resultsDiv.innerText = "⚠️ Load database first";
         return;
     }
+
+    const features = rawInput
+        .split(",")
+        .map(f => f.trim())
+        .filter(f => f !== "");
+
+    // ✅ If multiple features → redirect to combo search
+    if (features.length > 1) {
+        runComboSearch();
+        return;
+    }
+
+    // ✅ normal single search
+    const input = features[0];
 
     const matches = [];
 
@@ -120,6 +137,54 @@ function showSuggestions() {
 function selectSuggestion(code) {
     document.getElementById("featureInput").value = code;
     document.getElementById("suggestions").innerHTML = "";
+}
+
+// ----------------------
+// RIGHT-SIDE FEATURE LIST
+// ----------------------
+function renderFeatureList() {
+    const list = document.getElementById('featureList');
+    if (!list || !FEATURE_INFO) return;
+
+    const entries = Object.entries(FEATURE_INFO).sort((a,b) => a[0].localeCompare(b[0]));
+
+    list.innerHTML = entries.map(([code, desc]) => `
+        <div class="feature-item" onclick="addFeatureToInput('${code}')">
+            <b>${code}</b> - <span style="color:gray">${desc}</span>
+        </div>
+    `).join('');
+}
+
+function filterFeatureList() {
+    const q = document.getElementById('featureListSearch').value.trim().toLowerCase();
+    const list = document.getElementById('featureList');
+    if (!list || !FEATURE_INFO) return;
+
+    const entries = Object.entries(FEATURE_INFO)
+        .filter(([code, desc]) => code.toLowerCase().includes(q) || desc.toLowerCase().includes(q))
+        .sort((a,b) => a[0].localeCompare(b[0]));
+
+    list.innerHTML = entries.map(([code, desc]) => `
+        <div class="feature-item" onclick="addFeatureToInput('${code}')">
+            <b>${code}</b> - <span style="color:gray">${desc}</span>
+        </div>
+    `).join('');
+}
+
+function addFeatureToInput(code) {
+    const input = document.getElementById('featureInput');
+    if (!input) return;
+
+    const current = input.value.trim();
+    if (!current) input.value = code;
+    else {
+        // avoid duplicate
+        const parts = current.split(',').map(s => s.trim()).filter(s=>s!=="");
+        if (!parts.includes(code)) parts.push(code);
+        input.value = parts.join(', ');
+    }
+
+    input.focus();
 }
 
 // ----------------------
@@ -219,22 +284,36 @@ function runComboSearch() {
 
     let output = `
         <b>Total Units:</b> ${analysis.totalUnits}<br><br>
-        <b>Top Combinations:</b><br><br>
     `;
 
     for (const item of analysis.top) {
         const comboStr = item.combo.join("+");
 
-        const descStr = item.combo
-            .map(code => `${code} (${FEATURE_INFO[code] || "N/A"})`)
-            .join("<br>");
-
+        // ✅ Main summary line
         output += `
-            <b>${comboStr}</b><br>
-            <span style="color:gray;font-size:0.9em">${descStr}</span><br>
-            ${item.count} 
-            (<span style="color:blue">${item.percent.toFixed(2)}%</span>)<br><br>
+            <div style="
+                margin-bottom:12px;
+                padding:8px;
+                border:1px solid #ddd;
+                border-radius:6px;
+                background:#fafafa;
+            ">
+                <b>${comboStr}</b> - 
+                <span style="color:blue">${item.percent.toFixed(2)}%</span> 
+                (${item.count} units)
+                <br>
         `;
+
+        for (const code of item.combo) {
+            output += `
+                <span style="color:#555; font-size:0.9em;">
+                    ${FEATURE_INFO[code] || "N/A"}
+                </span><br>
+            `;
+        }
+
+        output += `</div>`;
+
     }
 
     resultsDiv.innerHTML = output;
