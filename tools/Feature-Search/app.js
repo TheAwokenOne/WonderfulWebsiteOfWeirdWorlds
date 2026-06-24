@@ -79,10 +79,10 @@ function runSearch() {
         <b>Description:</b> ${FEATURE_INFO[input] || "Not Found"}<br>
         <b>Matches:</b> ${matches.length}<br>
         <b>Percent:</b> <span style="color:blue">${percent.toFixed(2)}%</span><br><br>
-        <b>Jobs:</b><br>
-        ${matches.join("<br>")}
-    `;
-}
+        `;
+    }
+    // <b>Jobs:</b><br>
+    // ${matches.join("<br>")}
 
 // ----------------------
 // DATA STRUCTURE
