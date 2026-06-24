@@ -74,6 +74,97 @@
             background: var(--color-primary-dark);
             box-shadow: 0 0 8px rgba(225, 29, 138, 0.5);
         }
+
+        .page-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        /* LEFT PANEL */
+        .instructions-box {
+            width: 400px;
+            flex-shrink: 0;
+
+            background: #474747; /* light grey instead of yellow */
+            border: 3px solid #d0ff00;
+            border-radius: 8px;
+
+            padding: 16px;
+
+            position: sticky;
+            top: 20px; /* keeps it visible while scrolling */
+        }
+
+        .instructions-box h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .instructions-box ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .instructions-box li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* RIGHT SIDE */
+        .main-content {
+            flex: 1;
+        }
+
+        .chart-card {
+            background: var(--color-card);
+            border: 1px solid var(--color-card-border);
+            border-radius: 8px;
+            padding: 16px;
+            justify-content: center;
+        }
+
+        .instructions-box {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Shared card style */
+        .instruction-card,
+        .settings-card {
+            background: #474747;
+            border: 2px solid #d0ff00;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        /* Titles */
+        .instruction-card h3,
+        .settings-card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        /* Settings layout */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        /* Dropdown styling */
+        .settings-card select {
+            background: #1f2937;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 4px 6px;
+        }
     </style>
 </head>
 
@@ -83,53 +174,91 @@
     loadNav();
 </script> -->
 
-<div class="container">
+<div class="page-layout">
 
-    <h2 class="highlight-secondary">Chart Generator</h2>
+    <!-- LEFT: INSTRUCTIONS -->
+    <div class="instructions-box">
 
-    <!-- FILE SELECT -->
-    <div class="card top-bar">
-        <label for="fileInput" class="file-button">
-            Select Excel Files
-        </label>
-        <input type="file" id="fileInput" multiple hidden>
-    </div>
-
-    <!-- CHART -->
-    <div class="card">
-
-        <div class="chart-container">
-            <canvas id="mainChart"></canvas>
+        <!-- INSTRUCTIONS -->
+        <div class="instruction-card">
+            <h3>Instructions</h3>
+            <ul>
+                <li>Select one or more Excel files</li>
+                <li>Each file = one variation/chart</li>
+                <li>Use Next/Previous to cycle through</li>
+                <li>"Master Chart" combines all data</li>
+                <li>Download individual or all charts</li>
+            </ul>
         </div>
 
-        <!-- CONTROLS -->
-        <div class="controls">
+        <!-- SETTINGS -->
+        <div class="settings-card">
+            <h3>Export Settings</h3>
 
-            <!-- LEFT -->
-            <div class="button-group">
-                <button onclick="prevChart()">◀ Previous</button>
-                <button onclick="nextChart()">Next ▶</button>
-            </div>
+            <!-- Lock Toggle -->
+            <label class="setting-row">
+                <input type="checkbox" id="lockSizeToggle" checked>
+                Lock Export Size
+            </label>
 
-            <!-- TITLE -->
-            <div id="chartTitle">No chart loaded</div>
-
-            <!-- RIGHT -->
-            <div class="button-group">
-                <button onclick="downloadCurrentChart()">Download</button>
-                <button onclick="downloadAllCharts()">Download All</button>
-                <button id="masterToggleBtn" onclick="toggleMasterView()">Show Master Chart</button>
-                <button onclick="backToCharts()">Back</button>
-            </div>
+            <!-- Resolution Dropdown -->
+            <label class="setting-row">
+                Resolution:
+                <select id="resolutionSelect">
+                    <option value="1920x1080" selected>1920x1080 (Full HD)</option>
+                    <option value="1280x720">1280x720 (HD)</option>
+                    <option value="1600x900">1600x900</option>
+                    <option value="800x600">800x600</option>
+                </select>
+            </label>
 
         </div>
 
     </div>
 
+    <!-- RIGHT: MAIN CONTENT -->
+    <div class="main-content">
+
+        <h2 class="highlight-secondary">Chart Generator</h2>
+
+        <!-- FILE SELECT -->
+        <div class="card top-bar">
+            <label for="fileInput" class="file-button">
+                Select Excel Files
+            </label>
+            <input type="file" id="fileInput" multiple hidden>
+        </div>
+
+        <!-- CHART -->
+        <div class="chart-card">
+
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="button-group">
+                    <button onclick="prevChart()">◀ Previous</button>
+                    <button onclick="nextChart()">Next ▶</button>
+                </div>
+
+                <div id="chartTitle">No chart loaded</div>
+
+                <div class="button-group">
+                    <button onclick="downloadCurrentChart()">Download</button>
+                    <button onclick="downloadAllCharts()">Download All</button>
+                    <button id="masterToggleBtn" onclick="toggleMasterView()">Show Master Chart</button>
+                    <button onclick="backToCharts()">Back</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    
 </div>
 
 <script src="app.js"></script>
 
 </body>
 </html>
-``
