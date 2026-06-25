@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Splitter</title>
+
+    <link rel="stylesheet" href="../../common/styles.css">
+
+    <style>
+        body {
+            font-family: "Segoe UI", Roboto, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            gap: 24px;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        /* LEFT - big preview */
+        .left {
+            flex: 3;
+        }
+
+        /* RIGHT - controls */
+        .right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .drop-zone {
+            scale: 1;
+            border: 2px dashed var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--color-background);
+            margin-bottom: 10px;
+        }
+
+        #mainPreview {
+            width: 100%;
+            border-radius: 0;
+            border: 1px solid var(--color-border);
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="../../common/nav.js"></script>
+
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+
+        <div class="card section">
+
+            <h3 style="margin-top:0;">Preview</h3>
+
+            <div id="dropZone" class="drop-zone">
+                Drag & Drop Image<br>or Click
+            </div>
+
+            <input type="file" id="fileInput" hidden>
+
+            <canvas id="mainPreview"></canvas>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <!-- CONTROLS -->
+        <div class="card">
+            <h3>Controls</h3>
+
+            <label>Tiles</label><br>
+            <select id="parts">
+                <option value="2">2</option>
+                <option value="4" selected>4</option>
+                <option value="6">6</option>
+            </select>
+
+            <br><br>
+
+            <label>Border Size: <span id="borderValue">20</span>px</label><br>
+            <input 
+                type="range" 
+                id="borderSize" 
+                min="0" 
+                max="100" 
+                value="20"
+                style="width:100%;">
+
+
+            <br><br>
+
+            <label>Border Color</label><br>
+            <input type="color" id="borderColor" value="#ff0000">
+
+            <br><br>
+
+            <!-- <button onclick="generatePreview()">Generate Preview</button> -->
+
+            <!-- <br><br> -->
+
+            <button onclick="downloadAll()">Download Tiles</button>
+        </div>
+
+        <!-- INSTRUCTIONS -->
+        <div class="card">
+            <h3>Instructions</h3>
+
+            <ul style="font-size: 13px; line-height: 1.6;">
+                <li>Upload image</li>
+                <li>Adjust settings</li>
+                <li>Preview updates with splits</li>
+                <li>Download when ready</li>
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -10,6 +10,7 @@ function loadNav() {
     const homePath = isSubPage ? "../../index.html" : "index.html";
     const chartPath = toolPath("Chart-App");
     const featurePath = toolPath("Feature-Search");
+    const pictureTilerPath = toolPath("Picture-Tiler");
 
     const currentPath = window.location.pathname.toLowerCase();
 
@@ -23,6 +24,9 @@ function loadNav() {
         if (type === "feature") {
             return currentPath.includes("feature-search") ? "active" : "";
         }
+        if (type === "picture") {
+            return currentPath.includes("picture-tiler") ? "active" : "";
+        }
         return "";
     }
 
@@ -33,6 +37,7 @@ function loadNav() {
             <a href="${homePath}" class="${getActiveClass('home')}">Home</a>
             <a href="${chartPath}" class="${getActiveClass('chart')}">Chart Tool</a>
             <a href="${featurePath}" class="${getActiveClass('feature')}">Feature Search</a>
+            <a href="${pictureTilerPath}" class="${getActiveClass('picture')}">Picture Tiler</a>
         </div>
     `;
 

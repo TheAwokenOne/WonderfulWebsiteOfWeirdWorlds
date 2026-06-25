@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="../../common/styles.css">
 
     <style>
+        body {
+            font-family: "Segoe UI", Roboto, sans-serif;
+        }
+
         .container {
             display: flex;
             gap: 24px;
@@ -49,6 +53,91 @@
         .section {
             margin-bottom: 16px;
         }
+
+        /* ===== RESULT CARD ===== */
+        .result-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+
+            padding: 16px 18px;
+            margin-top: 10px;
+
+            transition: all 0.2s ease;
+        }
+
+        .result-card:hover {
+            border-color: var(--color-secondary);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* ===== LEFT ===== */
+        .result-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .feature-code {
+            font-size: 13px;
+            color: var(--color-text-muted);
+            font-weight: 500;
+        }
+
+        .feature-desc {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--color-text-main);
+        }
+
+        .result-meta {
+            font-size: 12.5px;
+            color: var(--color-text-muted);
+        }
+
+        /* ===== RIGHT (PERCENT BOX) ===== */
+        .result-right {
+            min-width: 120px;
+
+            background: linear-gradient(
+                135deg,
+                var(--color-primary),
+                var(--color-primary-dark)
+            );
+
+            border-radius: 12px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            padding: 12px 10px;
+
+            /* ✅ subtle glow that matches your theme */
+            box-shadow: 0 0 10px rgba(225, 29, 138, 0.35);
+        }
+
+        /* ===== BIG % ===== */
+        .percent-value {
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--color-tertiary);  /* ✅ your yellow */
+            line-height: 1;
+        }
+
+        /* ===== LABEL ===== */
+        .percent-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 2px;
+        }
+
     </style>
 </head>
 

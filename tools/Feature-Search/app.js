@@ -75,11 +75,25 @@ function runSearch() {
     const percent = (matches.length / total) * 100;
 
     resultsDiv.innerHTML = `
-        <b>Feature:</b> ${input}<br>
-        <b>Description:</b> ${FEATURE_INFO[input] || "Not Found"}<br>
-        <b>Matches:</b> ${matches.length}<br>
-        <b>Percent:</b> <span style="color:blue">${percent.toFixed(2)}%</span><br><br>
-        `;
+        <div class="result-card">
+
+            <div class="result-left">
+                <div class="feature-code">Feature: ${input}</div>
+                <div class="feature-desc">${FEATURE_INFO[input] || "Not Found"}</div>
+
+                <div class="result-meta">
+                    Matches: ${matches.length}
+                </div>
+            </div>
+
+            <div class="result-right">
+                <div class="percent-value">${percent.toFixed(1)}%</div>
+                <div class="percent-label">Percent</div>
+            </div>
+
+        </div>
+    `;
+
     }
     // <b>Jobs:</b><br>
     // ${matches.join("<br>")}
@@ -292,20 +306,42 @@ function runComboSearch() {
         const comboStr = item.combo.join("+");
 
         output += `
-            <div class="result-card">
-                <b>${comboStr}</b> - 
-                <span style="color:#0078d4">${item.percent.toFixed(2)}%</span> 
-                (${item.count} units)
-                <br>
+        <div class="result-card">
+
+            <div class="result-left">
+                <div class="feature-code">${comboStr}</div>
+
+                <div class="result-meta">
+                    ${item.count} units
+                </div>
         `;
 
         for (const code of item.combo) {
             output += `
-                <div class="subtext">
+                <div class="feature-desc">
                     ${FEATURE_INFO[code] || "N/A"}
                 </div>
             `;
         }
+
+        output += `
+            </div>
+
+            <div class="result-right">
+                <div class="percent-value">${item.percent.toFixed(1)}%</div>
+                <div class="percent-label">Percent</div>
+            </div>
+
+        </div>
+        `;
+
+        // for (const code of item.combo) {
+        //     output += `
+        //         <div class="subtext">
+        //             ${FEATURE_INFO[code] || "N/A"}
+        //         </div>
+        //     `;
+        // }
 
         output += `</div>`;
     }
