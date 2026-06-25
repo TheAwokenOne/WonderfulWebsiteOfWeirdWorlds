@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Page Extractor</title>
+
+    <link rel="stylesheet" href="../../common/styles.css">
+
+    <style>
+        .container {
+            display: flex;
+            gap: 24px;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .left { flex: 3; }
+
+        .right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+            box-sizing: border-box;
+        }
+
+        /* ✅ Grid preview */
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .page-item {
+            border: 2px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: 0.2s;
+        }
+
+        .page-item img {
+            width: 100%;
+            display: block;
+        }
+
+        .page-number {
+            text-align: center;
+            font-size: 12px;
+            padding: 4px;
+        }
+
+        /* ✅ Selected */
+        .selected {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 6px rgba(225, 29, 138, 0.5);
+            opacity: 1;
+        }
+
+        /* ✅ Dimmed */
+        .dimmed {
+            opacity: 0.35;
+        }
+
+        .step-input {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-input input {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* custom buttons */
+        .step-input button {
+            width: 36px;
+            height: 36px;
+
+            display: flex;              /* ✅ THIS fixes alignment */
+            align-items: center;       /* vertical center */
+            justify-content: center;   /* horizontal center */
+
+            border: none;
+            border-radius: 8px;
+
+            background: linear-gradient(
+                135deg,
+                var(--color-primary),
+                var(--color-primary-dark)
+            );
+
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        /* hover */
+        .step-input button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(225, 29, 138, 0.4);
+        }
+
+        /* click */
+        .step-input button:active {
+            transform: scale(0.95);
+        }
+
+        .step-input input:focus {
+            box-shadow: 0 0 6px var(--color-primary);
+        }
+
+        .page-item {
+            cursor: pointer;
+        }
+        .page-item:hover {
+            transform: scale(1.03);
+        }
+
+        /* remove native number arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- ✅ libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script src="../../common/nav.js"></script>
+
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+        <div class="card">
+            <h3>Preview</h3>
+            <div id="previewGrid" class="page-grid"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <div class="card">
+            <label><b>Select PDF</b></label>
+
+            <div id="dropZone" class="drop-zone">
+                Drag & Drop PDF<br>or Click
+            </div>
+
+            <input type="file" id="fileInput" accept="application/pdf" hidden>
+            <label><b>Selection Mode</b></label><br>
+
+            <select id="mode">
+                <option value="auto" selected>Auto (Interval)</option>
+                <option value="manual">Manual Selection</option>
+            </select>
+
+            <br><br>
+
+           <div id="autoControls">
+                <label>Starting Page</label>
+
+                <div class="step-input">
+                    <button onclick="stepValue('startPage', -1)">−</button>
+                    <input type="number" id="startPage" value="2">
+                    <button onclick="stepValue('startPage', 1)">+</button>
+                </div>
+
+                <br><br>
+
+                <label>Keep Every Nth Page</label>
+
+                <div class="step-input">
+                    <button onclick="stepValue('interval', -1)">−</button>
+                    <input type="number" id="interval" value="4">
+                    <button onclick="stepValue('interval', 1)">+</button>
+                </div>
+            </div>
+
+
+
+            <br><br>
+
+            <button onclick="extractPages()">Export PDF</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

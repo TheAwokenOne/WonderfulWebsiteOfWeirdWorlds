@@ -11,6 +11,7 @@ function loadNav() {
     const chartPath = toolPath("Chart-App");
     const featurePath = toolPath("Feature-Search");
     const pictureTilerPath = toolPath("Picture-Tiler");
+    const pdfEditorPath = toolPath("PDF-Editor");
 
     const currentPath = window.location.pathname.toLowerCase();
 
@@ -27,6 +28,9 @@ function loadNav() {
         if (type === "picture") {
             return currentPath.includes("picture-tiler") ? "active" : "";
         }
+        if (type === "pdf") {
+            return currentPath.includes("pdf-editor") ? "active" : "";
+        }
         return "";
     }
 
@@ -38,6 +42,7 @@ function loadNav() {
             <a href="${chartPath}" class="${getActiveClass('chart')}">Chart Tool</a>
             <a href="${featurePath}" class="${getActiveClass('feature')}">Feature Search</a>
             <a href="${pictureTilerPath}" class="${getActiveClass('picture')}">Picture Tiler</a>
+            <a href="${pdfEditorPath}" class="${getActiveClass('pdf')}">PDF Editor</a>
         </div>
     `;
 
