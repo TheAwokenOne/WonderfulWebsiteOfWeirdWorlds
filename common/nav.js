@@ -12,6 +12,9 @@ function loadNav() {
     const featurePath = toolPath("Feature-Search");
     const pictureTilerPath = toolPath("Picture-Tiler");
     const pdfEditorPath = toolPath("PDF-Editor");
+    const excelShortcutsPath = toolPath("Excel-Shortcuts-List");
+    const pdiChecklistPath = toolPath("pdi_checklist_test");
+    const downTimeTrackerPath = toolPath("downtime-tracker");
 
     const currentPath = window.location.pathname.toLowerCase();
 
@@ -31,6 +34,15 @@ function loadNav() {
         if (type === "pdf") {
             return currentPath.includes("pdf-editor") ? "active" : "";
         }
+        if (type === "excel") {
+            return currentPath.includes("excel-shortcuts-list") ? "active" : "";
+        }
+        if (type === "pdi") {
+            return currentPath.includes("pdi_checklist_test") ? "active" : "";
+        }
+        if (type === "downtime") {
+            return currentPath.includes("downtime-tracker") ? "active" : "";
+        }
         return "";
     }
 
@@ -43,6 +55,9 @@ function loadNav() {
             <a href="${featurePath}" class="${getActiveClass('feature')}">Feature Search</a>
             <a href="${pictureTilerPath}" class="${getActiveClass('picture')}">Picture Tiler</a>
             <a href="${pdfEditorPath}" class="${getActiveClass('pdf')}">PDF Editor</a>
+            <a href="${excelShortcutsPath}" class="${getActiveClass('excel')}">Excel Shortcuts</a>
+            <a href="${pdiChecklistPath}" class="${getActiveClass('pdi')}">PDI Checklist</a>
+            <a href="${downTimeTrackerPath}" class="${getActiveClass('downtime')}">Downtime Tracker</a>
         </div>
     `;
 

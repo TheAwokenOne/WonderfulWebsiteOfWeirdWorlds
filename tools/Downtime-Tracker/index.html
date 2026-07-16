@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Downtime Tracker Pareto Chart</title>
+    <link rel="stylesheet" href="../../common/styles.css">
+  <style>
+    :root {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1c1c1c;
+      background: #f7f8fb;
+      line-height: 1.5;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+    }
+    header {
+      padding: 24px 28px 12px;
+      background: #1d2939;
+      color: white;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    header p {
+      margin: 8px 0 0;
+      color: #cbd5e1;
+      max-width: 860px;
+    }
+    .layout {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 1.2fr 1.8fr;
+      padding: 24px 28px 36px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .panel {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 24px;
+    }
+    .panel h2,
+    .panel h3 {
+      margin-top: 0;
+    }
+    .panel p {
+      margin: 10px 0 18px;
+      color: #4b5563;
+    }
+    textarea {
+      width: 100%;
+      min-height: 260px;
+      border-radius: 16px;
+      border: 1px solid #d1d5db;
+      padding: 18px;
+      background: #f8fafc;
+      font: 1rem ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #111827;
+      resize: vertical;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    button.primary {
+      background: #2563eb;
+      color: white;
+    }
+    button.secondary {
+      background: #e2e8f0;
+      color: #1f2937;
+    }
+    #message {
+      margin-top: 16px;
+      color: #dc2626;
+      min-height: 24px;
+    }
+    .summary {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .summary .card {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .summary .card h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: #374151;
+    }
+    .summary .card p {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
+    }
+    .chart-container {
+      border-radius: 20px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      overflow: hidden;
+      padding: 18px;
+    }
+    svg {
+      width: 100%;
+      height: 420px;
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th,
+    td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      color: #334155;
+      font-weight: 700;
+      background: #f8fafc;
+    }
+    td {
+      color: #1f2937;
+    }
+    td.percent,
+    td.cumulative {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    @media (max-width: 920px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .chart-container {
+        padding: 14px;
+      }
+      header {
+        padding: 18px 18px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+<script src="../../common/nav.js"></script>
+  <header>
+    <h1>Downtime Tracker – Pareto Chart Generator</h1>
+    <p>Paste downtime durations and reasons, then generate a Pareto chart showing totals by reason and cumulative contribution.</p>
+  </header>
+  <main class="layout">
+    <section class="panel">
+      <h2>Input Data</h2>
+      <p>Enter one record per line. Accepted formats include:</p>
+      <ul>
+        <li><code>45 Machine jam</code></li>
+        <li><code>30, Power outage</code></li>
+        <li><code>5:30, Material shortage</code></li>
+      </ul>
+      <textarea id="dataInput" aria-label="Downtime entries"></textarea>
+      <div class="buttons">
+        <button id="drawButton" class="primary">Generate Pareto Chart</button>
+        <button id="clearButton" class="secondary">Clear</button>
+      </div>
+      <div id="message" role="status" aria-live="polite"></div>
+    </section>
+    <section class="panel">
+      <div class="summary" id="summary"></div>
+      <div class="chart-container">
+        <svg id="paretoChart" viewBox="0 0 800 420" aria-label="Pareto chart"></svg>
+      </div>
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>Reason</th>
+            <th>Total Minutes</th>
+            <th class="percent">% of Total</th>
+            <th class="cumulative">Cumulative %</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

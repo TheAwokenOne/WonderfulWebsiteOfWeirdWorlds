@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PDI Checklist</title>
+    <link rel="stylesheet" href="../../common/styles.css">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+
+        /* ===== TABS ===== */
+
+        #tabs{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+
+            margin-bottom:20px;
+        }
+
+        .tab-btn{
+
+            background:var(--color-card);
+            color:var(--color-text-main);
+
+            border:1px solid var(--color-border);
+
+            padding:10px 16px;
+            border-radius:8px;
+
+            cursor:pointer;
+        }
+
+        .tab-btn.active{
+            background:var(--color-primary);
+            color:white;
+        }
+
+        /* ===== CHECKLIST ===== */
+
+        .checklist-card{
+
+            display:flex;
+            gap:12px;
+
+            align-items:stretch;
+        }
+
+        .checklist-main{
+
+            flex:1;
+        }
+
+        .checklist-title{
+
+            color:var(--color-secondary);
+
+            font-size:18px;
+            font-weight:600;
+
+            border-bottom:1px solid var(--color-border);
+
+            padding-bottom:6px;
+            margin-bottom:6px;
+        }
+
+        .checklist-description{
+
+            color:var(--color-text-main);
+
+            line-height:1.4;
+        }
+
+        .checklist-buttons{
+
+            display:flex;
+            gap:8px;
+        }
+
+        .tutorial-btn{
+
+            background:transparent;
+
+            border:1px solid var(--color-secondary);
+
+            color:var(--color-secondary);
+
+            min-width:120px;
+        }
+
+        .confirm-btn{
+
+            background:transparent;
+
+            border:1px solid var(--color-tertiary);
+
+            color:var(--color-tertiary);
+
+            min-width:120px;
+        }
+
+        /* ===== COMPLETE STATE ===== */
+
+        .checklist-card.complete{
+
+            border-color:#22c55e;
+
+            box-shadow:
+                0 0 15px rgba(34,197,94,.25);
+
+            background:
+                rgba(34,197,94,.12);
+        }
+
+        .checklist-card.complete .checklist-title{
+
+            color:#4ade80;
+        }
+
+        .checklist-card.complete .confirm-btn{
+
+            background:#22c55e;
+            border-color:#22c55e;
+            color:white;
+        }
+
+        .tutorial-panel{
+
+            margin-top:10px;
+
+            padding:12px;
+
+            border:1px solid var(--color-border);
+
+            border-radius:8px;
+
+            background:var(--color-background);
+
+            display:none;
+        }
+
+        .tutorial-panel.open{
+
+            display:block;
+        }
+
+    </style>
+</head>
+
+<body>
+<script src="../../common/nav.js"></script>
+<h1>PDI Inspection Checklist</h1>
+
+<div id="progress"></div>
+
+<div id="tabs"></div>
+
+<div id="checklist"></div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
