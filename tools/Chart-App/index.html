@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chart Generator</title>
-
+    <meta charset="UTF-8">
+    <title>Balance Chart Generator</title>
     <link rel="stylesheet" href="../../common/styles.css">
-    <script src="../../common/nav.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,11 +12,171 @@
     <!-- Excel parser -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
+    <!-- PDF exporter -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf/dist/jspdf.umd.min.js"></script>
+
     <style>
+        :root {
+            --color-bg: #1f2937;
+            --color-card: #2f3a4a;
+            --color-card-border: #4b5563;
+            --color-primary: #e11d8a;
+            --color-primary-dark: #be176f;
+            --color-secondary: #d0ff00;
+            --color-chart-bg: #ffffff;
+            --color-chart-border: #777;
+            --color-text: #f9fafb;
+            --color-muted: #d1d5db;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        button {
+            padding: 9px 14px;
+            border: none;
+            border-radius: 6px;
+            background: var(--color-primary);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--color-primary-dark);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .active-mode {
+            background: var(--color-secondary);
+            color: #111827;
+        }
+
+        .page-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .instructions-box {
+            width: 400px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .instruction-card,
+        .settings-card,
+        .status-card {
+            background: #474747;
+            border: 2px solid var(--color-secondary);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .instruction-card h3,
+        .settings-card h3,
+        .status-card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--color-secondary);
+        }
+
+        .instruction-card ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .instruction-card li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .settings-card select {
+            background: #1f2937;
+            color: white;
+            border: 1px solid #777;
+            border-radius: 4px;
+            padding: 5px 8px;
+        }
+
+        .status-text {
+            font-size: 13px;
+            color: var(--color-muted);
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .highlight-secondary {
+            color: var(--color-secondary);
+            margin-top: 0;
+        }
+
+        .card {
+            background: var(--color-card);
+            border: 1px solid var(--color-card-border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
         .top-bar {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
+        }
+
+        .file-button {
+            display: inline-block;
+            padding: 10px 16px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .file-button:hover {
+            background: var(--color-primary-dark);
+            box-shadow: 0 0 8px rgba(225, 29, 138, 0.5);
+        }
+
+        .chart-card {
+            background: var(--color-card);
+            border: 1px solid var(--color-card-border);
+            border-radius: 8px;
+            padding: 16px;
         }
 
         .chart-container {
@@ -25,11 +185,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-
             background: var(--color-chart-bg);
             border: 1px solid var(--color-chart-border);
             border-radius: 8px;
+            overflow: hidden;
         }
+
         .chart-container canvas {
             padding: 10px;
         }
@@ -50,6 +211,7 @@
 
         .button-group {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
         }
 
@@ -58,178 +220,89 @@
             text-align: center;
             flex: 1;
             color: var(--color-secondary);
+            min-width: 220px;
+            line-height: 1.4;
         }
 
-        .file-button {
-            display: inline-block;
-            padding: 10px 16px;
-            background: var(--color-primary);
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        @media (max-width: 1000px) {
+            .page-layout {
+                flex-direction: column;
+            }
 
-        .file-button:hover {
-            background: var(--color-primary-dark);
-            box-shadow: 0 0 8px rgba(225, 29, 138, 0.5);
-        }
+            .instructions-box {
+                width: 100%;
+                position: static;
+            }
 
-        .page-layout {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            padding: 20px;
-        }
-
-        /* LEFT PANEL */
-        .instructions-box {
-            width: 400px;
-            flex-shrink: 0;
-
-            background: #474747; /* light grey instead of yellow */
-            border: 3px solid #d0ff00;
-            border-radius: 8px;
-
-            padding: 16px;
-
-            position: sticky;
-            top: 20px; /* keeps it visible while scrolling */
-        }
-
-        .instructions-box h3 {
-            margin-top: 0;
-            margin-bottom: 12px;
-        }
-
-        .instructions-box ul {
-            padding-left: 18px;
-            margin: 0;
-        }
-
-        .instructions-box li {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        /* RIGHT SIDE */
-        .main-content {
-            flex: 1;
-        }
-
-        .chart-card {
-            background: var(--color-card);
-            border: 1px solid var(--color-card-border);
-            border-radius: 8px;
-            padding: 16px;
-            justify-content: center;
-        }
-
-        .instructions-box {
-            width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        /* Shared card style */
-        .instruction-card,
-        .settings-card {
-            background: #474747;
-            border: 2px solid #d0ff00;
-            border-radius: 8px;
-            padding: 16px;
-        }
-
-        /* Titles */
-        .instruction-card h3,
-        .settings-card h3 {
-            margin-top: 0;
-            margin-bottom: 12px;
-        }
-
-        /* Settings layout */
-        .setting-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        /* Dropdown styling */
-        .settings-card select {
-            background: #1f2937;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            padding: 4px 6px;
+            .chart-container {
+                height: 500px;
+            }
         }
     </style>
 </head>
 
 <body>
-
-<!-- <script>
-    loadNav();
-</script> -->
-
+<script src="../../common/nav.js"></script>
 <div class="page-layout">
 
-    <!-- LEFT: INSTRUCTIONS -->
+    <!-- LEFT PANEL -->
     <div class="instructions-box">
 
-        <!-- INSTRUCTIONS -->
         <div class="instruction-card">
             <h3>Instructions</h3>
             <ul>
-                <li>Select one or more Excel files</li>
-                <li>Each file = one variation/chart</li>
-                <li>Use Next/Previous to cycle through</li>
-                <li>"Master Chart" combines all data</li>
-                <li>Download individual or all charts</li>
+                <li>Select one or more Excel files.</li>
+                <li>Only sheets with cell E5 containing "Position Description" are used.</li>
+                <li>Use Next and Previous to cycle through charts.</li>
+                <li>Master Chart combines all WACT values.</li>
+                <li>Download All PDF exports every chart into one PDF file.</li>
             </ul>
         </div>
 
-        <!-- SETTINGS -->
         <div class="settings-card">
             <h3>Export Settings</h3>
 
-            <!-- Lock Toggle -->
             <label class="setting-row">
+                <span>Lock Export Size</span>
                 <input type="checkbox" id="lockSizeToggle" checked>
-                Lock Export Size
             </label>
 
-            <!-- Resolution Dropdown -->
             <label class="setting-row">
-                Resolution:
+                <span>Resolution</span>
                 <select id="resolutionSelect">
-                    <option value="1920x1080" selected>1920x1080 (Full HD)</option>
-                    <option value="1280x720">1280x720 (HD)</option>
+                    <option value="1920x1080" selected>1920x1080</option>
                     <option value="1600x900">1600x900</option>
+                    <option value="1280x720">1280x720</option>
                     <option value="800x600">800x600</option>
                 </select>
             </label>
+        </div>
 
+        <div class="status-card">
+            <h3>Status</h3>
+            <div id="statusText" class="status-text">No files selected.</div>
         </div>
 
     </div>
 
-    <!-- RIGHT: MAIN CONTENT -->
+    <!-- RIGHT PANEL -->
     <div class="main-content">
 
-        <h2 class="highlight-secondary">Chart Generator</h2>
+        <h2 class="highlight-secondary">Balance Chart Generator</h2>
 
-        <!-- FILE SELECT -->
         <div class="card top-bar">
             <label for="fileInput" class="file-button">
                 Select Excel Files
             </label>
-            <input type="file" id="fileInput" multiple hidden>
+            <input
+                type="file"
+                id="fileInput"
+                multiple
+                accept=".xlsx,.xlsm,.xls"
+                hidden
+            >
         </div>
 
-        <!-- CHART -->
         <div class="chart-card">
 
             <div class="chart-container">
@@ -237,25 +310,27 @@
             </div>
 
             <div class="controls">
+
                 <div class="button-group">
-                    <button onclick="prevChart()">◀ Previous</button>
-                    <button onclick="nextChart()">Next ▶</button>
+                    <button onclick="prevChart()">Previous</button>
+                    <button onclick="nextChart()">Next</button>
                 </div>
 
                 <div id="chartTitle">No chart loaded</div>
 
                 <div class="button-group">
-                    <button onclick="downloadCurrentChart()">Download</button>
-                    <button onclick="downloadAllCharts()">Download All</button>
+                    <button onclick="downloadCurrentChart()">Download PNG</button>
+                    <button onclick="downloadAllChartsPdf()">Download All PDF</button>
                     <button id="masterToggleBtn" onclick="toggleMasterView()">Show Master Chart</button>
                     <button onclick="backToCharts()">Back</button>
                 </div>
+
             </div>
 
         </div>
 
     </div>
-    
+
 </div>
 
 <script src="app.js"></script>
