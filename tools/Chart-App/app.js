@@ -4,7 +4,7 @@ let currentChart = null;
 let masterChartData = [];
 let isMasterView = false;
 
-const MAX_SHEETS_PER_WORKBOOK = 10;
+const MAX_SHEETS_PER_WORKBOOK = 999;
 const TARGET_CELL = "E5";
 const TARGET_TEXT = "Position Description";
 
@@ -1023,56 +1023,106 @@ async function process() {
                 cellStyles: false
             });
 
-            const sheets = workbook.SheetNames.slice(0, MAX_SHEETS_PER_WORKBOOK);
+        // ======================================
+        // PROCESS ALL SHEETS
+        // ======================================
 
-            for (const sheetName of sheets) {
-                totalSheetsChecked++;
+        const sheets = workbook.SheetNames;
 
-                const ws = workbook.Sheets[sheetName];
+        console.log(
+            `Workbook contains ${workbook.SheetNames.length} sheets`
+        );
 
-                if (!isBalanceChartSheet(ws)) {
-                    skippedNotBalanceChart++;
-                    continue;
-                }
+        for (const sheetName of sheets) {
 
-                const TAKT = extractTAKT(ws);
-                const { AV, NAV, W, PCT } = extractVariationData(ws);
+            console.log("==================================");
+            console.log("CHECKING SHEET:", sheetName);
 
-                if (isSheetEmpty(AV, NAV, W)) {
-                    skippedEmpty++;
-                    continue;
-                }
+            totalSheetsChecked++;
 
-                const labels = extractVariationLabels(ws);
-                const title = extractChartTitle(ws);
+            const ws = workbook.Sheets[sheetName];
 
-                const [wAV, wNAV, wW] = computeWact(AV, NAV, W, PCT);
+            if (!isBalanceChartSheet(ws)) {
 
-                chartDataList.push({
-                    labels: [...labels, "WACT"],
-                    AV: [...AV, wAV],
-                    NAV: [...NAV, wNAV],
-                    W: [...W, wW],
-                    takt: TAKT,
-                    title: `${file.name} - ${title}`,
-                    fileName: file.name,
-                    sheetName: sheetName,
-                    sheetTitle: title
-                });
+                console.warn(
+                    "SKIPPED - Not a balance chart sheet:",
+                    sheetName
+                );
 
-                masterChartData.push({
-                    label: `${file.name} - ${title}`,
-                    AV: wAV,
-                    NAV: wNAV,
-                    W: wW,
-                    takt: TAKT
-                });
+                skippedNotBalanceChart++;
+                continue;
             }
 
+            const TAKT = extractTAKT(ws);
+
+            const {
+                AV,
+                NAV,
+                W,
+                PCT
+            } = extractVariationData(ws);
+
+            if (isSheetEmpty(AV, NAV, W)) {
+
+                console.warn(
+                    "SKIPPED - Sheet appears empty:",
+                    sheetName
+                );
+
+                console.warn({
+                    AV,
+                    NAV,
+                    W
+                });
+
+                skippedEmpty++;
+                continue;
+            }
+
+            const labels = extractVariationLabels(ws);
+
+            const title = extractChartTitle(ws);
+
+            const [wAV, wNAV, wW] =
+                computeWact(
+                    AV,
+                    NAV,
+                    W,
+                    PCT
+                );
+
+            chartDataList.push({
+                labels: [...labels, "WACT"],
+                AV: [...AV, wAV],
+                NAV: [...NAV, wNAV],
+                W: [...W, wW],
+                takt: TAKT,
+                title: `${file.name} - ${title}`,
+                fileName: file.name,
+                sheetName: sheetName,
+                sheetTitle: title
+            });
+
+            masterChartData.push({
+                label: `${file.name} - ${title}`,
+                AV: wAV,
+                NAV: wNAV,
+                W: wW,
+                takt: TAKT
+            });
+
+            console.log(
+                "ADDED CHART:",
+                sheetName,
+                "|",
+                title
+            );
+        }
+
             filesProcessed++;
-        } catch (err) {
-            console.error(`Error processing ${file.name}`, err);
-            errors.push(`${file.name}: ${err.message || err}`);
+        } catch (error) {
+            console.error("Error processing file:", file.name, error);
+            errors.push(`${file.name}: ${error.message || error}`);
         }
     }
 
@@ -1096,7 +1146,15 @@ async function process() {
     if (errors.length > 0) {
         statusMessage += `\n\nErrors:\n${errors.join("\n")}`;
     }
+    console.log("==================================");
+    console.log("FINAL CHART COUNT:", chartDataList.length);
 
+    console.table(
+        chartDataList.map(c => ({
+            Sheet: c.sheetName,
+            Title: c.sheetTitle
+        }))
+    );
     setStatus(statusMessage);
 }
 
