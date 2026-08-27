@@ -14,7 +14,8 @@ function loadNav() {
     const pdfEditorPath = toolPath("PDF-Editor");
     const excelShortcutsPath = toolPath("Excel-Shortcuts-List");
     const pdiChecklistPath = toolPath("pdi_checklist_test");
-    const downTimeTrackerPath = toolPath("downtime-tracker");
+    const downTimeTrackerPath = toolPath("Downtime-Tracker");
+    const trackSearchPath = toolPath("Track-Search");
 
     const currentPath = window.location.pathname.toLowerCase();
 
@@ -43,6 +44,9 @@ function loadNav() {
         if (type === "downtime") {
             return currentPath.includes("downtime-tracker") ? "active" : "";
         }
+        if (type === "tracksearch") {
+            return currentPath.includes("track-search") ? "active" : "";
+        }
         return "";
     }
 
@@ -58,6 +62,7 @@ function loadNav() {
             <a href="${excelShortcutsPath}" class="${getActiveClass('excel')}">Excel Shortcuts</a>
             <a href="${pdiChecklistPath}" class="${getActiveClass('pdi')}">PDI Checklist</a>
             <a href="${downTimeTrackerPath}" class="${getActiveClass('downtime')}">Downtime Tracker</a>
+            <a href="${trackSearchPath}" class="${getActiveClass('tracksearch')}">Track Search</a>
         </div>
     `;
 
