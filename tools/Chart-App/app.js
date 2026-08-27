@@ -29,7 +29,29 @@ function setStatus(message) {
 function getExportSize() {
     const val = document.getElementById("resolutionSelect")?.value || "1920x1080";
     const [width, height] = val.split("x").map(Number);
-    return { width, height };
+    const { layout } = getChartSettings();
+
+    return layout === "horizontal"
+        ? { width: Math.min(width, height), height: Math.max(width, height) }
+        : { width: Math.max(width, height), height: Math.min(width, height) };
+}
+
+function getChartSettings() {
+    return {
+        layout: document.getElementById("layoutSelect")?.value || "vertical",
+        showFileName: document.getElementById("showFileNameToggle")?.checked !== false
+    };
+}
+
+function applyChartLayoutClass() {
+    const container = document.querySelector(".chart-container");
+
+    if (container) {
+        container.classList.toggle(
+            "horizontal-layout",
+            getChartSettings().layout === "horizontal"
+        );
+    }
 }
 
 // =========================
@@ -493,7 +515,7 @@ function titlePlugin(title, fontSize = 22) {
     };
 }
 
-function taktLinePlugin(takt) {
+function taktLinePlugin(takt, isHorizontal) {
     return {
         id: "taktLine",
         afterDraw: chart => {
@@ -502,18 +524,23 @@ function taktLinePlugin(takt) {
             }
 
             const ctx = chart.ctx;
-            const yScale = chart.scales.y;
-            const y = yScale.getPixelForValue(takt);
+            const valueScale = isHorizontal ? chart.scales.x : chart.scales.y;
+            const pixel = valueScale.getPixelForValue(takt);
 
-            if (!Number.isFinite(y)) {
+            if (!Number.isFinite(pixel)) {
                 return;
             }
 
             ctx.save();
 
             ctx.beginPath();
-            ctx.moveTo(chart.chartArea.left, y);
-            ctx.lineTo(chart.chartArea.right, y);
+            if (isHorizontal) {
+                ctx.moveTo(pixel, chart.chartArea.top);
+                ctx.lineTo(pixel, chart.chartArea.bottom);
+            } else {
+                ctx.moveTo(chart.chartArea.left, pixel);
+                ctx.lineTo(chart.chartArea.right, pixel);
+            }
             ctx.strokeStyle = COLOR_TAKT;
             ctx.lineWidth = 2;
             ctx.stroke();
@@ -522,15 +549,15 @@ function taktLinePlugin(takt) {
             ctx.font = "14px Arial";
 
             const textWidth = ctx.measureText(label).width;
-            const boxX = chart.chartArea.left + 4;
-            const boxY = y - 21;
+            const boxX = isHorizontal ? pixel + 4 : chart.chartArea.left + 4;
+            const boxY = isHorizontal ? chart.chartArea.top + 4 : pixel - 21;
 
             ctx.fillStyle = "white";
             ctx.fillRect(boxX - 2, boxY, textWidth + 8, 18);
 
             ctx.fillStyle = COLOR_TAKT;
-            ctx.textBaseline = "middle";
-            ctx.fillText(label, boxX + 2, boxY + 9);
+            ctx.textBaseline = isHorizontal ? "top" : "middle";
+            ctx.fillText(label, boxX + 2, boxY + (isHorizontal ? 2 : 9));
 
             ctx.restore();
         }
@@ -568,12 +595,22 @@ function formatNumber(value) {
     return String(Math.round(num * 100) / 100);
 }
 
+function getChartTitle(chartInfo) {
+    const { showFileName } = getChartSettings();
+
+    return showFileName || !chartInfo.sheetTitle
+        ? chartInfo.title
+        : chartInfo.sheetTitle;
+}
+
 // =========================
 // CHART CONFIG
 // =========================
 
 function buildChartConfig(chartInfo, exportMode = false) {
-    const { labels, AV, NAV, W, takt, title } = chartInfo;
+    const { labels, AV, NAV, W, takt } = chartInfo;
+    const { layout } = getChartSettings();
+    const isHorizontal = layout === "horizontal";
 
     const yMax = getYMax(AV, NAV, W, takt);
 
@@ -607,6 +644,7 @@ function buildChartConfig(chartInfo, exportMode = false) {
         options: {
             responsive: !exportMode,
             maintainAspectRatio: false,
+            indexAxis: isHorizontal ? "y" : "x",
             devicePixelRatio: exportMode ? 1 : 2,
             animation: false,
             layout: {
@@ -639,10 +677,17 @@ function buildChartConfig(chartInfo, exportMode = false) {
             scales: {
                 x: {
                     stacked: true,
+                    beginAtZero: true,
+                    max: isHorizontal ? yMax : undefined,
                     ticks: {
                         autoSkip: false,
-                        maxRotation: labels.length > 8 ? 45 : 0,
-                        minRotation: labels.length > 8 ? 45 : 0,
+                        maxRotation: isHorizontal ? 0 : (labels.length > 8 ? 45 : 0),
+                        minRotation: isHorizontal ? 0 : (labels.length > 8 ? 45 : 0),
+                        color: "black"
+                    },
+                    title: {
+                        display: isHorizontal,
+                        text: "Time",
                         color: "black"
                     },
                     grid: {
@@ -651,13 +696,13 @@ function buildChartConfig(chartInfo, exportMode = false) {
                 },
                 y: {
                     stacked: true,
-                    beginAtZero: true,
-                    max: yMax,
+                    beginAtZero: !isHorizontal,
+                    max: isHorizontal ? undefined : yMax,
                     ticks: {
                         color: "black"
                     },
                     title: {
-                        display: true,
+                        display: !isHorizontal,
                         text: "Time",
                         color: "black"
                     },
@@ -669,8 +714,8 @@ function buildChartConfig(chartInfo, exportMode = false) {
         },
         plugins: [
             whiteBackgroundPlugin(),
-            titlePlugin(title, exportMode ? 24 : 14),
-            taktLinePlugin(takt)
+            titlePlugin(getChartTitle(chartInfo), exportMode ? 24 : 14),
+            taktLinePlugin(takt, isHorizontal)
         ]
     };
 }
@@ -685,6 +730,7 @@ function renderCurrentChart() {
     }
 
     isMasterView = false;
+    applyChartLayoutClass();
 
     const canvas = document.getElementById("mainChart");
     const ctx = canvas.getContext("2d");
@@ -692,13 +738,25 @@ function renderCurrentChart() {
     const chartInfo = chartDataList[currentIndex];
 
     document.getElementById("chartTitle").innerHTML =
-        `Chart ${currentIndex + 1} of ${chartDataList.length}<br>${chartInfo.title}`;
+        `Chart ${currentIndex + 1} of ${chartDataList.length}<br>${getChartTitle(chartInfo)}`;
 
     if (currentChart) {
         currentChart.destroy();
     }
 
     currentChart = new Chart(ctx, buildChartConfig(chartInfo, false));
+}
+
+function refreshChartDisplay() {
+    if (chartDataList.length === 0) {
+        return;
+    }
+
+    if (isMasterView) {
+        showMasterChart();
+    } else {
+        renderCurrentChart();
+    }
 }
 
 function backToCharts() {
@@ -729,6 +787,7 @@ function showMasterChart() {
     }
 
     isMasterView = true;
+    applyChartLayoutClass();
 
     const btn = document.getElementById("masterToggleBtn");
     if (btn) {
@@ -855,7 +914,7 @@ async function downloadCurrentChart() {
     const imageData = await renderChartToCanvas(chartInfo, width, height);
 
     const link = document.createElement("a");
-    const title = chartInfo.title.replace(/[^a-z0-9]/gi, "_");
+    const title = getChartTitle(chartInfo).replace(/[^a-z0-9]/gi, "_");
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
 
     link.download = `${title}_${timestamp}.png`;
@@ -945,7 +1004,10 @@ async function downloadAllChartsPdf() {
 }
 
 function buildMasterChartInfo() {
-    const labels = masterChartData.map(d => d.label);
+    const { showFileName } = getChartSettings();
+    const labels = masterChartData.map(d =>
+        showFileName ? d.label : d.sheetTitle
+    );
     const AV = masterChartData.map(d => d.AV);
     const NAV = masterChartData.map(d => d.NAV);
     const W = masterChartData.map(d => d.W);
@@ -1105,6 +1167,7 @@ async function process() {
 
             masterChartData.push({
                 label: `${file.name} - ${title}`,
+                sheetTitle: title,
                 AV: wAV,
                 NAV: wNAV,
                 W: wW,
@@ -1168,4 +1231,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fileInput) {
         fileInput.addEventListener("change", process);
     }
+
+    ["layoutSelect", "showFileNameToggle"].forEach(id => {
+        const setting = document.getElementById(id);
+
+        if (setting) {
+            setting.addEventListener("change", refreshChartDisplay);
+        }
+    });
 });

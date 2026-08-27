@@ -191,6 +191,12 @@
             overflow: hidden;
         }
 
+        .chart-container.horizontal-layout {
+            height: auto;
+            aspect-ratio: 9 / 16;
+            min-height: 650px;
+        }
+
         .chart-container canvas {
             padding: 10px;
         }
@@ -237,6 +243,11 @@
             .chart-container {
                 height: 500px;
             }
+
+            .chart-container.horizontal-layout {
+                height: auto;
+                min-height: 500px;
+            }
         }
     </style>
 </head>
@@ -275,6 +286,19 @@
                     <option value="1280x720">1280x720</option>
                     <option value="800x600">800x600</option>
                 </select>
+            </label>
+
+            <label class="setting-row">
+                <span>Chart Layout</span>
+                <select id="layoutSelect">
+                    <option value="vertical" selected>Vertical bars</option>
+                    <option value="horizontal">Horizontal bars (photo style)</option>
+                </select>
+            </label>
+
+            <label class="setting-row">
+                <span>Show File Names</span>
+                <input type="checkbox" id="showFileNameToggle" checked>
             </label>
         </div>
 
