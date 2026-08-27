@@ -16,6 +16,7 @@ function loadNav() {
     const pdiChecklistPath = toolPath("pdi_checklist_test");
     const downTimeTrackerPath = toolPath("Downtime-Tracker");
     const trackSearchPath = toolPath("Track-Search");
+    const trackOperationSimPath = toolPath("Track-Operation-Sim");
 
     const currentPath = window.location.pathname.toLowerCase();
 
@@ -47,6 +48,9 @@ function loadNav() {
         if (type === "tracksearch") {
             return currentPath.includes("track-search") ? "active" : "";
         }
+        if (type === "trackoperationsim") {
+            return currentPath.includes("track-operation-sim") ? "active" : "";
+        }
         return "";
     }
 
@@ -63,6 +67,7 @@ function loadNav() {
             <a href="${pdiChecklistPath}" class="${getActiveClass('pdi')}">PDI Checklist</a>
             <a href="${downTimeTrackerPath}" class="${getActiveClass('downtime')}">Downtime Tracker</a>
             <a href="${trackSearchPath}" class="${getActiveClass('tracksearch')}">Track Search</a>
+            <a href="${trackOperationSimPath}" class="${getActiveClass('trackoperationsim')}">Track Operation Sim</a>
         </div>
     `;
 
