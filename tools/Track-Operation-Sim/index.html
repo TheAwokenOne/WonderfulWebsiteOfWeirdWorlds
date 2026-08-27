@@ -275,12 +275,26 @@
 
         .driver-plus9 { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-left: 10px; }
         .driver-regular { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .main-plus9 { grid-template-columns: repeat(6, minmax(0, 1fr)); padding-right: 10px; column-gap: 4px; }
-        .main-regular { grid-template-columns: repeat(8, minmax(0, 1fr)); column-gap: 4px; }
+        .main-plus9 { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-right: 10px; column-gap: 28px; }
+        .main-regular { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 28px; }
 
-        .main-plus9 .indicator:nth-child(even),
-        .main-regular .indicator:nth-child(even) {
-            margin-right: 16px;
+        .indicator-group {
+            display: flex;
+            gap: 0;
+            min-width: 0;
+            padding: 8px 4px 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: rgba(203, 213, 225, 0.42);
+        }
+
+        .indicator-group .indicator {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .indicator-group-single {
+            min-width: 0;
         }
 
         .full-row {
@@ -571,6 +585,16 @@
 
             .indicator-row {
                 gap: 6px;
+            }
+
+            .main-plus9,
+            .main-regular {
+                column-gap: 0;
+            }
+
+            .main-plus9,
+            .main-regular {
+                column-gap: 16px;
             }
 
             .indicator-label {

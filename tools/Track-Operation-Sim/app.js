@@ -7,7 +7,8 @@ const state = {
     operations: [],
     currentIndex: 0,
     loaded: false,
-    awaitingNewTrack: false
+    awaitingNewTrack: false,
+    emptyTrackGrabbed: false
 };
 
 const elements = {};
@@ -87,15 +88,30 @@ function buildIndicators() {
         const container = document.getElementById(containerId);
         container.replaceChildren();
 
-        definitions.forEach(definition => {
-            const indicator = document.createElement("div");
-            indicator.className = "indicator";
-            indicator.id = definition.id;
-            indicator.innerHTML = `
-                <div class="indicator-bulb" aria-hidden="true"></div>
-                <div class="indicator-label">${escapeHtml(definition.label)}</div>
-            `;
-            container.appendChild(indicator);
+        const groups = containerId.startsWith("main")
+            ? Array.from({ length: Math.ceil(definitions.length / 2) }, (_, index) =>
+                definitions.slice(index * 2, index * 2 + 2)
+            )
+            : definitions.map(definition => [definition]);
+
+        groups.forEach(groupDefinitions => {
+            const group = document.createElement("div");
+            group.className = containerId.startsWith("main")
+                ? "indicator-group"
+                : "indicator-group-single";
+
+            groupDefinitions.forEach(definition => {
+                const indicator = document.createElement("div");
+                indicator.className = "indicator";
+                indicator.id = definition.id;
+                indicator.innerHTML = `
+                    <div class="indicator-bulb" aria-hidden="true"></div>
+                    <div class="indicator-label">${escapeHtml(definition.label)}</div>
+                `;
+                group.appendChild(indicator);
+            });
+
+            container.appendChild(group);
         });
     });
 }
@@ -142,6 +158,7 @@ function loadCsvText(text, sourceName) {
         state.operations = [];
         state.currentIndex = 0;
         state.awaitingNewTrack = false;
+        state.emptyTrackGrabbed = false;
 
         populateSelect(
             elements.unitLength,
@@ -184,9 +201,11 @@ function normalizeRows(parsedRows) {
             row.Side &&
             Number.isFinite(row.Track) &&
             row.TrackLength &&
-            /^(L|SP)[1-4]$/.test(row.OperationCode) &&
-            Number.isFinite(row.Station) &&
-            ["Light", "Speaker"].includes(row.OperationType)
+            (!row.OperationCode || (
+                /^(L|SP)[1-4]$/.test(row.OperationCode) &&
+                Number.isFinite(row.Station) &&
+                ["Light", "Speaker"].includes(row.OperationType)
+            ))
         );
 }
 
@@ -274,14 +293,26 @@ function loadSelectedUnit() {
         return;
     }
 
-    state.operations = [...matchingRows]
-        .sort(compareOperations)
-        .map((operation, index) => ({ ...operation, sequence: index + 1, complete: false }));
+    state.operations = buildTrackOperations(matchingRows);
 
     state.currentIndex = 0;
     state.loaded = true;
     state.awaitingNewTrack = false;
+    state.emptyTrackGrabbed = false;
+
+    if (state.operations[0]?.isEmptyTrack) {
+        state.awaitingNewTrack = true;
+    }
+
     showTrackCompletionNotice("");
+
+    if (state.awaitingNewTrack) {
+        showTrackCompletionNotice(
+            `Track ${state.operations[0].Track} has no operations. Click Grab New Track to grab it.`,
+            "complete"
+        );
+    }
+
     renderSelectionSummary(selection);
     renderSimulation();
     setStatus(
@@ -292,18 +323,73 @@ function loadSelectedUnit() {
 
 function compareOperations(a, b) {
     const sideOrder = { Driver: 0, Passenger: 1 };
+    const sideComparison = (sideOrder[a.Side] ?? 99) - (sideOrder[b.Side] ?? 99);
+
+    if (sideComparison !== 0) {
+        return sideComparison;
+    }
+
+    const trackComparison = a.Track - b.Track;
+
+    if (trackComparison !== 0) {
+        return trackComparison;
+    }
 
     if (isDriverSpeaker(a) && isDriverSpeaker(b)) {
         return getSpeakerNumber(a.OperationCode) - getSpeakerNumber(b.OperationCode) ||
-            a.Track - b.Track ||
             a.Station - b.Station ||
             a.sourceRow - b.sourceRow;
     }
 
-    return (sideOrder[a.Side] ?? 99) - (sideOrder[b.Side] ?? 99) ||
-        a.Track - b.Track ||
+    return (isDriverSpeaker(a) ? -1 : 0) - (isDriverSpeaker(b) ? -1 : 0) ||
         a.Station - b.Station ||
         a.sourceRow - b.sourceRow;
+}
+
+function buildTrackOperations(rows) {
+    const groupedTracks = new Map();
+
+    rows.forEach(row => {
+        const key = `${row.Side}:${row.Track}`;
+
+        if (!groupedTracks.has(key)) {
+            groupedTracks.set(key, []);
+        }
+
+        groupedTracks.get(key).push(row);
+    });
+
+    const operations = [];
+
+    [...groupedTracks.values()]
+        .sort((firstTrack, secondTrack) =>
+            compareOperations(firstTrack[0], secondTrack[0])
+        )
+        .forEach(trackRows => {
+            const trackOperations = trackRows
+                .filter(operation => operation.OperationCode && operation.OperationType)
+                .sort(compareOperations);
+
+            if (trackOperations.length === 0) {
+                operations.push({
+                    ...trackRows[0],
+                    isEmptyTrack: true,
+                    sequence: operations.length + 1,
+                    complete: false
+                });
+                return;
+            }
+
+            trackOperations.forEach(operation => {
+                operations.push({
+                    ...operation,
+                    sequence: operations.length + 1,
+                    complete: false
+                });
+            });
+        });
+
+    return operations;
 }
 
 function isDriverSpeaker(operation) {
@@ -318,6 +404,10 @@ function performPunch(punchType) {
     if (!state.loaded || state.awaitingNewTrack || state.currentIndex >= state.operations.length) return;
 
     const current = state.operations[state.currentIndex];
+
+    if (current.isEmptyTrack) {
+        return;
+    }
 
     if (current.OperationType !== punchType) {
         setStatus(
@@ -367,8 +457,50 @@ function performPunch(punchType) {
 function grabNewTrack() {
     if (!state.loaded || !state.awaitingNewTrack) return;
 
+    const current = state.operations[state.currentIndex];
+
+    if (current?.isEmptyTrack) {
+        if (!state.emptyTrackGrabbed) {
+            state.emptyTrackGrabbed = true;
+            renderSimulation();
+            showTrackCompletionNotice(
+                `Track ${current.Track} has no operations. Click Grab New Track again to mark it complete.`,
+                "complete"
+            );
+            setStatus(
+                `Track ${current.Track} has no operations. Grab it again to continue.`,
+                "info"
+            );
+            return;
+        }
+
+        current.complete = true;
+        state.currentIndex += 1;
+        state.emptyTrackGrabbed = false;
+
+        if (state.currentIndex >= state.operations.length) {
+            state.awaitingNewTrack = false;
+            renderSimulation();
+            showTrackCompletionNotice("UNIT COMPLETE. All tracks are complete.", "complete");
+            setStatus("UNIT COMPLETE. All required tracks have been completed.", "success");
+            return;
+        }
+    }
+
     state.awaitingNewTrack = false;
     showTrackCompletionNotice("");
+
+    if (state.operations[state.currentIndex]?.isEmptyTrack) {
+        state.awaitingNewTrack = true;
+        renderSimulation();
+        showTrackCompletionNotice(
+            `Track ${state.operations[state.currentIndex].Track} has no operations. Click Grab New Track to grab it.`,
+            "complete"
+        );
+        setStatus("No operations are listed for this track. Continue to the next track.", "info");
+        return;
+    }
+
     renderSimulation();
 
     const next = state.operations[state.currentIndex];
@@ -392,6 +524,7 @@ function undoLastPunch() {
     state.currentIndex -= 1;
     state.operations[state.currentIndex].complete = false;
     state.awaitingNewTrack = false;
+    state.emptyTrackGrabbed = false;
     renderSimulation();
     setStatus(`Returned to ${state.operations[state.currentIndex].OperationCode}.`, "info");
 }
@@ -401,6 +534,7 @@ function resetSimulation() {
     state.currentIndex = 0;
     state.loaded = state.operations.length > 0;
     state.awaitingNewTrack = false;
+    state.emptyTrackGrabbed = false;
     showTrackCompletionNotice("");
     renderSimulation();
 
@@ -416,6 +550,7 @@ function resetSimulationDisplay() {
     state.currentIndex = 0;
     state.loaded = false;
     state.awaitingNewTrack = false;
+    state.emptyTrackGrabbed = false;
     showTrackCompletionNotice("");
     renderEmptySummary();
     renderSimulation();
@@ -437,6 +572,16 @@ function renderSimulation() {
     }
 
     markCompletedIndicators();
+
+    if (current?.isEmptyTrack) {
+        setCurrentOperationDisplay(current);
+        elements.lightPunchButton.disabled = true;
+        elements.speakerPunchButton.disabled = true;
+        elements.newTrackButton.disabled = !state.awaitingNewTrack;
+        elements.newTrackButton.classList.toggle("ready", state.awaitingNewTrack);
+        renderQueue();
+        return;
+    }
 
     if (complete) {
         setCurrentOperationDisplay(null, true);
@@ -527,6 +672,11 @@ function setCurrentOperationDisplay(operation, unitComplete = false) {
         elements.currentTrack.textContent = "-";
         elements.currentTrackLength.textContent = "-";
         elements.currentOperation.textContent = "DONE";
+    } else if (operation?.isEmptyTrack) {
+        elements.currentSide.textContent = operation.Side;
+        elements.currentTrack.textContent = operation.Track;
+        elements.currentTrackLength.textContent = operation.TrackLength;
+        elements.currentOperation.textContent = "No operations";
     } else if (operation) {
         elements.currentSide.textContent = operation.Side;
         elements.currentTrack.textContent = operation.Track;
