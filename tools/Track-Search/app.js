@@ -604,6 +604,30 @@ function renderResults(matches) {
         return getSideSortOrder(a) - getSideSortOrder(b);
     });
 
+    const driverSideName =
+        Object.keys(groupedData).find(side => {
+            return normalizeComparisonValue(side) === "driver";
+        }) || sides[0];
+
+    const passengerSideName =
+        Object.keys(groupedData).find(side => {
+            return normalizeComparisonValue(side) === "passenger";
+        });
+
+    if (passengerSideName) {
+        html += createFullUnitOverview(
+            groupedData[passengerSideName],
+            "Passenger Overview"
+        );
+    }
+
+    if (driverSideName) {
+        html += createFullUnitOverview(
+            groupedData[driverSideName],
+            "Driver Overview"
+        );
+    }
+
     sides.forEach(side => {
         html += `
             <section class="side-section">
@@ -667,6 +691,119 @@ function groupBySideAndTrack(records) {
     return grouped;
 }
 
+function createFullUnitOverview(groupedSideTracks, label = "Overview") {
+    const trackNumbers = Object.keys(groupedSideTracks).sort(
+        (a, b) => toSortableNumber(a) - toSortableNumber(b)
+    );
+
+    if (trackNumbers.length === 0) {
+        return "";
+    }
+
+    const totalSections = trackNumbers.reduce((total, trackNumber) => {
+        const operations = groupedSideTracks[trackNumber];
+        const trackLength = getCombinedTrackLength(operations);
+
+        return total + getTrackLengthSectionCount(trackLength);
+    }, 0);
+
+    const sectionMap = Array.from({ length: totalSections }, () => []);
+    const trackGroups = [];
+    let runningTotal = 0;
+
+    trackNumbers.forEach(trackNumber => {
+        const operations = groupedSideTracks[trackNumber];
+        const trackSectionCount = getTrackLengthSectionCount(
+            getCombinedTrackLength(operations)
+        );
+
+        const trackGroupStart = runningTotal;
+        const trackGroupEnd = runningTotal + trackSectionCount - 1;
+
+        trackGroups.push({
+            trackNumber,
+            start: trackGroupStart,
+            end: trackGroupEnd
+        });
+
+        operations.forEach(operation => {
+            const sectionIndex =
+                runningTotal + getOperationSection(operation) - 1;
+
+            if (sectionIndex >= 0 && sectionIndex < totalSections) {
+                sectionMap[sectionIndex].push(operation);
+            }
+        });
+
+        runningTotal += trackSectionCount;
+    });
+
+    const sectionHtml = sectionMap.map((sectionOperations, index) => {
+        const symbolism = (sectionOperations || [])
+            .map(operation => {
+                const typeClass = normalizeComparisonValue(
+                    operation.OperationType
+                );
+
+                return `
+                    <span
+                        class="unit-overview-symbol ${escapeHTML(typeClass)}"
+                        aria-hidden="true"
+                    ></span>
+                `;
+            })
+            .join("");
+
+        const group = trackGroups.find(group => {
+            return index >= group.start && index <= group.end;
+        });
+
+        const groupClass = group
+            ? ` unit-overview-section track-${group.trackNumber}`
+            : " unit-overview-section";
+
+        return `
+            <div class="${groupClass.trim()}">
+                <div class="unit-overview-symbols">
+                    ${symbolism}
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    const trackGroupBoxes = trackGroups.map(group => {
+        const left = (group.start / totalSections) * 100;
+        const width = ((group.end - group.start + 1) / totalSections) * 100;
+
+        return `
+            <div
+                class="unit-overview-track-box"
+                style="left: ${left}%; width: ${width}%;"
+                title="Track ${escapeHTML(group.trackNumber)}"
+            ></div>
+        `;
+    }).join("");
+
+    return `
+        <div class="unit-overview">
+            <h3 class="side-title">${escapeHTML(label)}</h3>
+
+            <div class="unit-overview-bar">
+                <div class="unit-overview-track-boxes">
+                    ${trackGroupBoxes}
+                </div>
+
+                <div
+                    class="unit-overview-grid"
+                    style="--unit-section-count: ${totalSections};"
+                >
+                    ${sectionHtml}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 /*
     Track length should normally be the same for all operations
     on one track. If it is not, display every unique value.
@@ -684,6 +821,38 @@ function createTrackCard(
     trackLength,
     operations
 ) {
+    const sectionCount = getTrackSectionCount(trackLength);
+    const operationsBySection = {};
+
+    operations.forEach(operation => {
+        const sectionNumber = getOperationSection(operation);
+
+        if (!operationsBySection[sectionNumber]) {
+            operationsBySection[sectionNumber] = [];
+        }
+
+        operationsBySection[sectionNumber].push(operation);
+    });
+
+    const trackSections = Array.from(
+        { length: sectionCount },
+        (_, index) => {
+            const sectionNumber = index + 1;
+            const sectionOperations =
+                operationsBySection[sectionNumber] || [];
+
+            return `
+                <div class="track-section" data-section="${sectionNumber}">
+                    <div class="track-section-content">
+                        ${sectionOperations
+                            .map(createTrackSectionSymbol)
+                            .join("") || ""}
+                    </div>
+                </div>
+            `;
+        }
+    ).join("");
+
     const operationRows = operations
         .map(createOperationRow)
         .join("");
@@ -701,12 +870,93 @@ function createTrackCard(
                 </span>
             </div>
 
+            <div class="track-visual">
+                <div class="track-rail">
+                    <div
+                        class="track-sections"
+                        style="--track-section-count: ${sectionCount};"
+                    >
+                        ${trackSections}
+                    </div>
+                </div>
+            </div>
+
             <div class="operation-list">
                 ${operationRows}
             </div>
 
         </div>
     `;
+}
+
+function createTrackSectionSymbol(operation) {
+    const typeClass = normalizeComparisonValue(
+        operation.OperationType
+    );
+
+    return `
+        <div class="track-symbol-row">
+            <span
+                class="track-symbol ${escapeHTML(typeClass)}"
+                aria-hidden="true"
+            ></span>
+            <span class="track-section-label">
+                ${escapeHTML(operation.OperationCode)}
+            </span>
+        </div>
+    `;
+}
+
+function getTrackSectionCount(trackLength) {
+    return getTrackLengthSectionCount(trackLength);
+}
+
+function getTrackLengthSectionCount(trackLength) {
+    const lengthValue = cleanValue(trackLength);
+
+    if (!lengthValue) {
+        return 3;
+    }
+
+    const values = lengthValue
+        .split("/")
+        .map(part => part.trim())
+        .filter(Boolean);
+
+    const total = values.reduce((sum, value) => {
+        const match = value.match(/(\d+)/);
+
+        if (!match) {
+            return sum;
+        }
+
+        const parsed = Number.parseInt(match[1], 10);
+
+        return Number.isFinite(parsed) && parsed > 0
+            ? sum + parsed
+            : sum;
+    }, 0);
+
+    return total > 0 ? total : 3;
+}
+
+function getOperationSection(operation) {
+    const stationValue = cleanValue(operation.Station);
+    const codeValue = cleanValue(operation.OperationCode);
+
+    const stationMatch = stationValue.match(/(\d+)/);
+
+    if (stationMatch) {
+        return Number.parseInt(stationMatch[1], 10) || 1;
+    }
+
+    const codeMatch = codeValue.match(/(\d+)/);
+
+    if (codeMatch) {
+        return Number.parseInt(codeMatch[1], 10) || 1;
+    }
+
+    return 1;
 }
 
 function createOperationRow(operation) {
